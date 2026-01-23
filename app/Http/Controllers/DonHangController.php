@@ -15,7 +15,7 @@ class DonHangController extends Controller
     public function index(Request $request)
     {
         $ngay = $request->get('ngay', Carbon::today()->format('Y-m-d'));
-        
+
         $donHangs = DonHang::whereDate('ngay_ban', $ngay)
             ->orderBy('created_at', 'desc')
             ->get();
@@ -54,10 +54,7 @@ class DonHangController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Thêm đơn hàng thành công!',
-            'donHang' => $donHang
-        ]);
-    }
-
+            'donHang' => $donHang,
             'data' => [
                 'id' => $donHang->id,
                 'ten_san_pham' => $donHang->ten_san_pham,
