@@ -13,10 +13,12 @@ class SanPham extends Model
         'dvt',
         'gia_nhap',
         'gia_ban',
+        'gia_ban_le',
     ];
 
     protected $casts = [
         'gia_nhap' => 'decimal:0',
         'gia_ban' => 'decimal:0',
+        'gia_ban_le' => 'decimal:0',
     ];
 }

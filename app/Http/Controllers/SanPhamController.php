@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\SanPham;
+use App\Models\DonViTinh;
 use Illuminate\Http\Request;
 
 class SanPhamController extends Controller
@@ -21,7 +22,8 @@ class SanPhamController extends Controller
      */
     public function create()
     {
-        return view('san-pham.create');
+        $donViTinhs = DonViTinh::orderBy('ten_don_vi')->get();
+        return view('san-pham.create', compact('donViTinhs'));
     }
 
     /**
@@ -34,6 +36,7 @@ class SanPhamController extends Controller
             'dvt' => 'nullable|string|max:50',
             'gia_nhap' => 'nullable|numeric|min:0',
             'gia_ban' => 'nullable|numeric|min:0',
+            'gia_ban_le' => 'nullable|numeric|min:0',
         ]);
 
         SanPham::create($request->all());
@@ -47,7 +50,8 @@ class SanPhamController extends Controller
      */
     public function edit(SanPham $sanPham)
     {
-        return view('san-pham.edit', compact('sanPham'));
+        $donViTinhs = DonViTinh::orderBy('ten_don_vi')->get();
+        return view('san-pham.edit', compact('sanPham', 'donViTinhs'));
     }
 
     /**
@@ -60,6 +64,7 @@ class SanPhamController extends Controller
             'dvt' => 'nullable|string|max:50',
             'gia_nhap' => 'nullable|numeric|min:0',
             'gia_ban' => 'nullable|numeric|min:0',
+            'gia_ban_le' => 'nullable|numeric|min:0',
         ]);
 
         $sanPham->update($request->all());

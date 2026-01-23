@@ -18,8 +18,9 @@
                         <th style="width: 60px;">STT</th>
                         <th>Tên sản phẩm</th>
                         <th style="width: 100px;">DVT</th>
-                        <th style="width: 150px;" class="text-end">Giá nhập</th>
-                        <th style="width: 150px;" class="text-end">Giá bán</th>
+                        <th style="width: 130px;" class="text-end">Giá nhập</th>
+                        <th style="width: 130px;" class="text-end">Giá bán</th>
+                        <th style="width: 130px;" class="text-end">Giá bán lẻ</th>
                         <th style="width: 120px;" class="text-center">Thao tác</th>
                     </tr>
                 </thead>
@@ -31,6 +32,7 @@
                         <td>{{ $sp->dvt }}</td>
                         <td class="text-end">{{ number_format($sp->gia_nhap, 0, ',', '.') }}</td>
                         <td class="text-end">{{ number_format($sp->gia_ban, 0, ',', '.') }}</td>
+                        <td class="text-end">{{ number_format($sp->gia_ban_le, 0, ',', '.') }}</td>
                         <td class="text-center">
                             <a href="{{ route('san-pham.edit', $sp) }}" class="btn btn-warning btn-action" title="Sửa">
                                 <i class="fas fa-edit"></i>
@@ -46,7 +48,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center text-muted">Chưa có sản phẩm nào</td>
+                        <td colspan="7" class="text-center text-muted">Chưa có sản phẩm nào</td>
                     </tr>
                     @endforelse
                 </tbody>
