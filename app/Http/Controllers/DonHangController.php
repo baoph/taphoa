@@ -20,47 +20,20 @@ class DonHangController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $tongTien = $donHangs->sum(function ($dh) {
-            return $dh->so_luong * $dh->gia;
+        $tongTien = $donHangs->sum(function ($item) {
+            return $item->so_luong * $item->gia;
         });
+
+        if ($request->ajax()) {
+            return response()->json([
+                'donHangs' => $donHangs,
+                'tongTien' => $tongTien
+            ]);
+        }
 
         return view('don-hang.index', compact('donHangs', 'ngay', 'tongTien'));
     }
 
-    /**
-     * API: Lấy danh sách đơn hàng theo ngày
-     */
-    public function getByDate(Request $request)
-    {
-        $ngay = $request->get('ngay', Carbon::today()->format('Y-m-d'));
-        
-        $donHangs = DonHang::whereDate('ngay_ban', $ngay)
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        $tongTien = $donHangs->sum(function ($dh) {
-            return $dh->so_luong * $dh->gia;
-        });
-
-        return response()->json([
-            'success' => true,
-            'data' => $donHangs->map(function ($dh) {
-                return [
-                    'id' => $dh->id,
-                    'ten_san_pham' => $dh->ten_san_pham,
-                    'so_luong' => $dh->so_luong,
-                    'gia' => $dh->gia,
-                    'thanh_tien' => $dh->so_luong * $dh->gia,
-                    'ngay_ban' => $dh->ngay_ban->format('Y-m-d'),
-                ];
-            }),
-            'tong_tien' => $tongTien,
-        ]);
-    }
-
-    /**
-     * API: Thêm đơn hàng mới
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -74,12 +47,17 @@ class DonHangController extends Controller
             'ten_san_pham' => $request->ten_san_pham,
             'so_luong' => $request->so_luong,
             'gia' => $request->gia,
+
             'ngay_ban' => $request->ngay_ban,
         ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Thêm đơn hàng thành công!',
+            'donHang' => $donHang
+        ]);
+    }
+
             'data' => [
                 'id' => $donHang->id,
                 'ten_san_pham' => $donHang->ten_san_pham,

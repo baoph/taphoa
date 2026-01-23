@@ -79,6 +79,16 @@ class SanPhamController extends Controller
             ->with('success', 'Xóa sản phẩm thành công!');
     }
 
+    public function getSanPham(Request $request)
+    {
+        $search = $request->get('q', '');
+        $sanPhams = SanPham::where('ten_san_pham', 'like', "%{$search}%")
+            ->select('id', 'ten_san_pham as text', 'gia_ban')
+            ->limit(20)
+            ->get();
+
+        return response()->json(['results' => $sanPhams]);
+      }
     /**
      * API: Tìm kiếm sản phẩm cho Select2
      */
