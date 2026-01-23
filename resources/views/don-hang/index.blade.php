@@ -72,6 +72,7 @@
             <div class="modal-body">
                 <form id="donHangForm">
                     <input type="hidden" id="donHangId">
+                    <input type="hidden" id="sanPhamId">
                     
                     <div class="mb-3">
                         <label for="tenSanPham" class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
@@ -82,7 +83,9 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="soLuong" class="form-label">Số lượng <span class="text-danger">*</span></label>
+                            <label for="soLuong" class="form-label">
+                                Số lượng <span id="dvtLabel" class="text-muted"></span> <span class="text-danger">*</span>
+                            </label>
                             <input type="number" class="form-control" id="soLuong" min="1" value="1" required>
                         </div>
 
@@ -114,6 +117,7 @@
 @push('scripts')
 <script>
     let currentNgay = '{{ $ngay }}';
+    let currentDvt = '';
 
     $(document).ready(function() {
         // Initialize Select2
@@ -144,11 +148,30 @@
             }
         });
 
-        // When select product, auto-fill price
+        // When select product, auto-fill price and show DVT
         $('#tenSanPham').on('select2:select', function(e) {
-            if (e.params.data.gia_ban) {
-                $('#giaBan').val(e.params.data.gia_ban);
+            const data = e.params.data;
+            
+            // Lưu san_pham_id nếu có
+            if (data.id && !data.newTag) {
+                $('#sanPhamId').val(data.id);
+            } else {
+                $('#sanPhamId').val('');
+            }
+            
+            // Auto-fill giá bán
+            if (data.gia_ban) {
+                $('#giaBan').val(data.gia_ban);
                 updateThanhTien();
+            }
+            
+            // Hiển thị đơn vị tính
+            if (data.dvt) {
+                currentDvt = data.dvt;
+                $('#dvtLabel').text('(' + data.dvt + ')');
+            } else {
+                currentDvt = '';
+                $('#dvtLabel').text('');
             }
         });
 
@@ -171,17 +194,20 @@
 
     function resetForm() {
         $('#donHangId').val('');
+        $('#sanPhamId').val('');
         $('#tenSanPham').val(null).trigger('change');
         $('#soLuong').val(1);
         $('#giaBan').val(0);
         $('#thanhTienPreview').text('0 đ');
+        $('#dvtLabel').text('');
+        currentDvt = '';
         $('#modalTitle').html('<i class="fas fa-plus me-2"></i>Thêm đơn hàng');
     }
 
     function loadDonHang() {
-        $.get('{{ route("don-hang.list") }}', { ngay: currentNgay }, function(response) {
-            if (response.success) {
-                renderTable(response.data, response.tong_tien);
+        $.get('{{ route("don-hang.index") }}', { ngay: currentNgay }, function(response) {
+            if (response.donHangs) {
+                renderTable(response.donHangs, response.tongTien);
                 // Update URL
                 window.history.pushState({}, '', '{{ route("don-hang.index") }}?ngay=' + currentNgay);
             }
@@ -200,7 +226,7 @@
                         <td>${dh.ten_san_pham}</td>
                         <td class="text-center">${dh.so_luong}</td>
                         <td class="text-end">${formatNumber(dh.gia)}</td>
-                        <td class="text-end">${formatNumber(dh.thanh_tien)}</td>
+                        <td class="text-end">${formatNumber(dh.so_luong * dh.gia)}</td>
                         <td class="text-center">
                             <button type="button" class="btn btn-warning btn-action" onclick="editDonHang(${dh.id})" title="Sửa">
                                 <i class="fas fa-edit"></i>
@@ -219,16 +245,18 @@
 
     function saveDonHang() {
         const id = $('#donHangId').val();
+        const sanPhamId = $('#sanPhamId').val();
         const tenSanPham = $('#tenSanPham').val();
         const soLuong = $('#soLuong').val();
         const gia = $('#giaBan').val();
 
         if (!tenSanPham) {
-            alert('Vui lòng chọn sản phẩm!');
+            toastr.warning('Vui lòng chọn sản phẩm!');
             return;
         }
 
         const data = {
+            san_pham_id: sanPhamId || null,
             ten_san_pham: tenSanPham,
             so_luong: soLuong,
             gia: gia,
@@ -246,15 +274,15 @@
                 if (response.success) {
                     $('#donHangModal').modal('hide');
                     loadDonHang();
-                    alert(response.message);
+                    toastr.success(response.message);
                 }
             },
             error: function(xhr) {
                 const errors = xhr.responseJSON?.errors;
                 if (errors) {
-                    alert(Object.values(errors).flat().join('\n'));
+                    toastr.error(Object.values(errors).flat().join('<br>'));
                 } else {
-                    alert('Có lỗi xảy ra!');
+                    toastr.error('Có lỗi xảy ra!');
                 }
             }
         });
@@ -265,9 +293,10 @@
             if (response.success) {
                 const dh = response.data;
                 $('#donHangId').val(dh.id);
+                $('#sanPhamId').val(dh.san_pham_id || '');
                 
                 // Set Select2 value
-                const option = new Option(dh.ten_san_pham, dh.ten_san_pham, true, true);
+                const option = new Option(dh.ten_san_pham, dh.san_pham_id || dh.ten_san_pham, true, true);
                 $('#tenSanPham').append(option).trigger('change');
                 
                 $('#soLuong').val(dh.so_luong);
@@ -288,13 +317,17 @@
             success: function(response) {
                 if (response.success) {
                     loadDonHang();
-                    alert(response.message);
+                    toastr.success(response.message);
                 }
             },
             error: function() {
-                alert('Có lỗi xảy ra!');
+                toastr.error('Có lỗi xảy ra!');
             }
         });
+    }
+
+    function formatNumber(num) {
+        return new Intl.NumberFormat('vi-VN').format(num);
     }
 </script>
 @endpush

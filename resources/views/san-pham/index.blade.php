@@ -16,6 +16,22 @@
         </div>
     </div>
     <div class="card-body">
+        <!-- Search Box -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" 
+                           class="form-control" 
+                           id="searchInput" 
+                           placeholder="Tìm kiếm tên sản phẩm..." 
+                           value="{{ $search ?? '' }}">
+                </div>
+            </div>
+        </div>
+
         <div class="table-responsive">
             <table class="table table-striped table-hover">
                 <thead>
@@ -33,44 +49,74 @@
                         <th style="width: 120px;" class="text-center">Thao tác</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @forelse($sanPhams as $index => $sp)
-                    <tr>
-                        <td>{{ $sanPhams->firstItem() + $index }}</td>
-                        <td>{{ $sp->ten_san_pham }}</td>
-                        <td>{{ $sp->dvt }}</td>
-                        <td class="text-end">{{ number_format($sp->gia_nhap, 0, ',', '.') }}đ</td>
-                        <td class="text-end">{{ number_format($sp->gia_ban, 0, ',', '.') }}đ</td>
-                        <td class="text-end">{{ number_format($sp->gia_ban_le, 0, ',', '.') }}đ</td>
-                        <td class="text-center">{{ number_format($sp->so_luong ?? 0, 2, ',', '.') }}</td>
-                        <td class="text-center">{{ number_format($sp->ti_so_chuyen_doi ?? 1, 2, ',', '.') }}</td>
-                        <td class="text-center">{{ number_format($sp->so_luong_don_vi ?? 0, 2, ',', '.') }}</td>
-                        <td>{{ $sp->ghi_chu ? Str::limit($sp->ghi_chu, 30) : '-' }}</td>
-                        <td class="text-center">
-                            <a href="{{ route('san-pham.edit', $sp) }}" class="btn btn-warning btn-action" title="Sửa">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <form action="{{ route('san-pham.destroy', $sp) }}" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa sản phẩm này?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-action" title="Xóa">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="11" class="text-center text-muted">Chưa có sản phẩm nào</td>
-                    </tr>
-                    @endforelse
+                <tbody id="sanPhamTableBody">
+                    @include('san-pham.partials.table')
                 </tbody>
             </table>
         </div>
         
-        <div class="d-flex justify-content-center">
-            {{ $sanPhams->links() }}
+        <div class="d-flex justify-content-center" id="paginationContainer">
+            @include('san-pham.partials.pagination')
         </div>
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+$(document).ready(function() {
+    let searchTimeout;
+    
+    // AJAX Search
+    $('#searchInput').on('keyup', function() {
+        clearTimeout(searchTimeout);
+        const searchValue = $(this).val();
+        
+        searchTimeout = setTimeout(function() {
+            performSearch(searchValue);
+        }, 300); // Debounce 300ms
+    });
+    
+    function performSearch(search) {
+        $.ajax({
+            url: '{{ route("san-pham.search.ajax") }}',
+            type: 'GET',
+            data: { search: search },
+            success: function(response) {
+                if (response.success) {
+                    $('#sanPhamTableBody').html(response.html);
+                    $('#paginationContainer').html(response.pagination);
+                }
+            },
+            error: function() {
+                toastr.error('Có lỗi xảy ra khi tìm kiếm');
+            }
+        });
+    }
+    
+    // Handle pagination clicks
+    $(document).on('click', '.pagination a', function(e) {
+        e.preventDefault();
+        const url = $(this).attr('href');
+        const search = $('#searchInput').val();
+        
+        $.ajax({
+            url: url,
+            type: 'GET',
+            data: { search: search },
+            success: function(response) {
+                if (response.success) {
+                    $('#sanPhamTableBody').html(response.html);
+                    $('#paginationContainer').html(response.pagination);
+                    
+                    // Scroll to top of table
+                    $('html, body').animate({
+                        scrollTop: $('.card').offset().top - 20
+                    }, 300);
+                }
+            }
+        });
+    });
+});
+</script>
+@endpush

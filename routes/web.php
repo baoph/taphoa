@@ -13,7 +13,10 @@ Route::get('/', function () {
 Route::resource('san-pham', SanPhamController::class)->parameters([
     'san-pham' => 'sanPham'
 ]);
+
+// API routes cho sản phẩm
 Route::get('api/san-pham/search', [SanPhamController::class, 'search'])->name('san-pham.search');
+Route::get('api/san-pham/search-ajax', [SanPhamController::class, 'searchAjax'])->name('san-pham.search.ajax');
 
 // Import Excel
 Route::get('san-pham-import', [SanPhamController::class, 'showImportForm'])->name('san-pham.import.form');

@@ -9,6 +9,7 @@ class DonHang extends Model
     protected $table = 'don_hang';
 
     protected $fillable = [
+        'san_pham_id',
         'ten_san_pham',
         'so_luong',
         'gia',
@@ -26,5 +27,13 @@ class DonHang extends Model
     public function getThanhTienAttribute(): float
     {
         return $this->so_luong * $this->gia;
+    }
+
+    /**
+     * Relationship: Đơn hàng thuộc về một sản phẩm
+     */
+    public function sanPham()
+    {
+        return $this->belongsTo(SanPham::class, 'san_pham_id');
     }
 }
