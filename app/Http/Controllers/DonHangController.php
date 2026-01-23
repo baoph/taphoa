@@ -37,6 +37,7 @@ class DonHangController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'san_pham_id' => 'nullable|exists:san_pham,id',
             'ten_san_pham' => 'required|string|max:255',
             'so_luong' => 'required|integer|min:1',
             'gia' => 'required|numeric|min:0',
@@ -44,10 +45,10 @@ class DonHangController extends Controller
         ]);
 
         $donHang = DonHang::create([
+            'san_pham_id' => $request->san_pham_id,
             'ten_san_pham' => $request->ten_san_pham,
             'so_luong' => $request->so_luong,
             'gia' => $request->gia,
-
             'ngay_ban' => $request->ngay_ban,
         ]);
 
@@ -75,6 +76,7 @@ class DonHangController extends Controller
             'success' => true,
             'data' => [
                 'id' => $donHang->id,
+                'san_pham_id' => $donHang->san_pham_id,
                 'ten_san_pham' => $donHang->ten_san_pham,
                 'so_luong' => $donHang->so_luong,
                 'gia' => $donHang->gia,
@@ -89,6 +91,7 @@ class DonHangController extends Controller
     public function update(Request $request, DonHang $donHang)
     {
         $request->validate([
+            'san_pham_id' => 'nullable|exists:san_pham,id',
             'ten_san_pham' => 'required|string|max:255',
             'so_luong' => 'required|integer|min:1',
             'gia' => 'required|numeric|min:0',
@@ -96,6 +99,7 @@ class DonHangController extends Controller
         ]);
 
         $donHang->update([
+            'san_pham_id' => $request->san_pham_id,
             'ten_san_pham' => $request->ten_san_pham,
             'so_luong' => $request->so_luong,
             'gia' => $request->gia,

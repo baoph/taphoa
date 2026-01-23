@@ -13,10 +13,41 @@ class SanPhamController extends Controller
     /**
      * Hiển thị danh sách sản phẩm
      */
-    public function index()
+    public function index(Request $request)
     {
-        $sanPhams = SanPham::orderBy('ten_san_pham')->paginate(15);
-        return view('san-pham.index', compact('sanPhams'));
+        $search = $request->get('search', '');
+        
+        $sanPhams = SanPham::when($search, function ($query, $search) {
+                return $query->where('ten_san_pham', 'like', '%' . $search . '%');
+            })
+            ->orderBy('ten_san_pham')
+            ->paginate(15);
+        
+        if ($request->ajax()) {
+            return view('san-pham.partials.table', compact('sanPhams'))->render();
+        }
+        
+        return view('san-pham.index', compact('sanPhams', 'search'));
+    }
+
+    /**
+     * AJAX Search - Tìm kiếm sản phẩm real-time
+     */
+    public function searchAjax(Request $request)
+    {
+        $search = $request->get('search', '');
+        
+        $sanPhams = SanPham::when($search, function ($query, $search) {
+                return $query->where('ten_san_pham', 'like', '%' . $search . '%');
+            })
+            ->orderBy('ten_san_pham')
+            ->paginate(15);
+        
+        return response()->json([
+            'success' => true,
+            'html' => view('san-pham.partials.table', compact('sanPhams'))->render(),
+            'pagination' => view('san-pham.partials.pagination', compact('sanPhams'))->render(),
+        ]);
     }
 
     /**
@@ -106,16 +137,29 @@ class SanPhamController extends Controller
             ->with('success', 'Xóa sản phẩm thành công!');
     }
 
+    /**
+     * API: Lấy thông tin sản phẩm cho Select2 (bán hàng)
+     */
     public function getSanPham(Request $request)
     {
         $search = $request->get('q', '');
         $sanPhams = SanPham::where('ten_san_pham', 'like', "%{$search}%")
-            ->select('id', 'ten_san_pham as text', 'gia_ban')
+            ->select('id', 'ten_san_pham', 'gia_ban', 'dvt')
             ->limit(20)
             ->get();
 
-        return response()->json(['results' => $sanPhams]);
-      }
+        return response()->json([
+            'results' => $sanPhams->map(function ($sp) {
+                return [
+                    'id' => $sp->id,
+                    'text' => $sp->ten_san_pham,
+                    'gia_ban' => $sp->gia_ban,
+                    'dvt' => $sp->dvt,
+                ];
+            })
+        ]);
+    }
+
     /**
      * API: Tìm kiếm sản phẩm cho Select2
      */
@@ -126,14 +170,15 @@ class SanPhamController extends Controller
         $sanPhams = SanPham::where('ten_san_pham', 'like', '%' . $search . '%')
             ->orderBy('ten_san_pham')
             ->limit(20)
-            ->get(['id', 'ten_san_pham', 'gia_ban']);
+            ->get(['id', 'ten_san_pham', 'gia_ban', 'dvt']);
 
         return response()->json([
             'results' => $sanPhams->map(function ($sp) {
                 return [
-                    'id' => $sp->ten_san_pham,
+                    'id' => $sp->id,
                     'text' => $sp->ten_san_pham,
                     'gia_ban' => $sp->gia_ban,
+                    'dvt' => $sp->dvt,
                 ];
             })
         ]);

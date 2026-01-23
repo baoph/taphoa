@@ -28,4 +28,12 @@ class SanPham extends Model
         'ti_so_chuyen_doi' => 'decimal:2',
         'so_luong_don_vi' => 'decimal:2',
     ];
+
+    /**
+     * Relationship: Sản phẩm có nhiều đơn hàng
+     */
+    public function donHangs()
+    {
+        return $this->hasMany(DonHang::class, 'san_pham_id');
+    }
 }
