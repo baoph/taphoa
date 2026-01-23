@@ -37,9 +37,19 @@ class SanPhamController extends Controller
             'gia_nhap' => 'nullable|numeric|min:0',
             'gia_ban' => 'nullable|numeric|min:0',
             'gia_ban_le' => 'nullable|numeric|min:0',
+            'so_luong' => 'nullable|integer|min:0',
+            'ti_so_chuyen_doi' => 'nullable|integer|min:1',
+            'ghi_chu' => 'nullable|string',
         ]);
 
-        SanPham::create($request->all());
+        $data = $request->all();
+        
+        // Tính toán số lượng đơn vị tự động
+        $soLuong = $request->input('so_luong', 0);
+        $tiSoChuyenDoi = $request->input('ti_so_chuyen_doi', 1);
+        $data['so_luong_don_vi'] = $soLuong * $tiSoChuyenDoi;
+
+        SanPham::create($data);
 
         return redirect()->route('san-pham.index')
             ->with('success', 'Thêm sản phẩm thành công!');
@@ -65,9 +75,19 @@ class SanPhamController extends Controller
             'gia_nhap' => 'nullable|numeric|min:0',
             'gia_ban' => 'nullable|numeric|min:0',
             'gia_ban_le' => 'nullable|numeric|min:0',
+            'so_luong' => 'nullable|integer|min:0',
+            'ti_so_chuyen_doi' => 'nullable|integer|min:1',
+            'ghi_chu' => 'nullable|string',
         ]);
 
-        $sanPham->update($request->all());
+        $data = $request->all();
+        
+        // Tính toán số lượng đơn vị tự động
+        $soLuong = $request->input('so_luong', 0);
+        $tiSoChuyenDoi = $request->input('ti_so_chuyen_doi', 1);
+        $data['so_luong_don_vi'] = $soLuong * $tiSoChuyenDoi;
+
+        $sanPham->update($data);
 
         return redirect()->route('san-pham.index')
             ->with('success', 'Cập nhật sản phẩm thành công!');
