@@ -16,6 +16,15 @@ class DonHang extends Model
     ];
 
     protected $casts = [
+        'gia' => 'decimal:0',
         'ngay_ban' => 'date',
     ];
+
+    /**
+     * Tính thành tiền
+     */
+    public function getThanhTienAttribute(): float
+    {
+        return $this->so_luong * $this->gia;
+    }
 }

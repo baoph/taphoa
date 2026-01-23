@@ -14,4 +14,9 @@ class SanPham extends Model
         'gia_nhap',
         'gia_ban',
     ];
+
+    protected $casts = [
+        'gia_nhap' => 'decimal:0',
+        'gia_ban' => 'decimal:0',
+    ];
 }

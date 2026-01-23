@@ -10,16 +10,18 @@ Route::get('/', function () {
 });
 
 // Quản lý sản phẩm
-Route::resource('san-pham', SanPhamController::class)->except(['show']);
-
-// API lấy danh sách sản phẩm cho Select2
-Route::get('/api/san-pham', [SanPhamController::class, 'getSanPham'])->name('api.san-pham');
+Route::resource('san-pham', SanPhamController::class)->parameters([
+    'san-pham' => 'sanPham'
+]);
+Route::get('api/san-pham/search', [SanPhamController::class, 'search'])->name('san-pham.search');
 
 // Quản lý đơn hàng
-Route::get('/don-hang', [DonHangController::class, 'index'])->name('don-hang.index');
-Route::post('/don-hang', [DonHangController::class, 'store'])->name('don-hang.store');
-Route::put('/don-hang/{donHang}', [DonHangController::class, 'update'])->name('don-hang.update');
-Route::delete('/don-hang/{donHang}', [DonHangController::class, 'destroy'])->name('don-hang.destroy');
+Route::get('don-hang', [DonHangController::class, 'index'])->name('don-hang.index');
+Route::get('don-hang/list', [DonHangController::class, 'getByDate'])->name('don-hang.list');
+Route::post('don-hang', [DonHangController::class, 'store'])->name('don-hang.store');
+Route::get('don-hang/{donHang}', [DonHangController::class, 'show'])->name('don-hang.show');
+Route::put('don-hang/{donHang}', [DonHangController::class, 'update'])->name('don-hang.update');
+Route::delete('don-hang/{donHang}', [DonHangController::class, 'destroy'])->name('don-hang.destroy');
 
 // Báo cáo
-Route::get('/bao-cao', [BaoCaoController::class, 'index'])->name('bao-cao.index');
+Route::get('bao-cao/doanh-thu', [BaoCaoController::class, 'doanhThu'])->name('bao-cao.doanh-thu');
