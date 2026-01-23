@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\SanPham;
 use App\Models\DonViTinh;
 use Illuminate\Http\Request;
+use App\Imports\SanPhamImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SanPhamController extends Controller
 {
@@ -37,8 +39,8 @@ class SanPhamController extends Controller
             'gia_nhap' => 'nullable|numeric|min:0',
             'gia_ban' => 'nullable|numeric|min:0',
             'gia_ban_le' => 'nullable|numeric|min:0',
-            'so_luong' => 'nullable|integer|min:0',
-            'ti_so_chuyen_doi' => 'nullable|integer|min:1',
+            'so_luong' => 'nullable|numeric|min:0',
+            'ti_so_chuyen_doi' => 'nullable|numeric|min:0.01',
             'ghi_chu' => 'nullable|string',
         ]);
 
@@ -75,8 +77,8 @@ class SanPhamController extends Controller
             'gia_nhap' => 'nullable|numeric|min:0',
             'gia_ban' => 'nullable|numeric|min:0',
             'gia_ban_le' => 'nullable|numeric|min:0',
-            'so_luong' => 'nullable|integer|min:0',
-            'ti_so_chuyen_doi' => 'nullable|integer|min:1',
+            'so_luong' => 'nullable|numeric|min:0',
+            'ti_so_chuyen_doi' => 'nullable|numeric|min:0.01',
             'ghi_chu' => 'nullable|string',
         ]);
 
@@ -135,5 +137,56 @@ class SanPhamController extends Controller
                 ];
             })
         ]);
+    }
+
+    /**
+     * Hiển thị form import Excel
+     */
+    public function showImportForm()
+    {
+        return view('san-pham.import');
+    }
+
+    /**
+     * Xử lý import Excel
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:5120', // Max 5MB
+        ], [
+            'file.required' => 'Vui lòng chọn file Excel để import',
+            'file.mimes' => 'File phải có định dạng: xlsx, xls hoặc csv',
+            'file.max' => 'Kích thước file không được vượt quá 5MB',
+        ]);
+
+        try {
+            $file = $request->file('file');
+            
+            // Import dữ liệu
+            $import = new SanPhamImport();
+            Excel::import($import, $file);
+            
+            // Kiểm tra lỗi
+            $errors = $import->errors();
+            
+            if (count($errors) > 0) {
+                $errorMessages = [];
+                foreach ($errors as $error) {
+                    $errorMessages[] = "Dòng {$error->row()}: {$error->errors()[0]}";
+                }
+                
+                return redirect()->back()
+                    ->with('warning', 'Import hoàn tất nhưng có một số lỗi:')
+                    ->with('errors', $errorMessages);
+            }
+            
+            return redirect()->route('san-pham.index')
+                ->with('success', 'Import dữ liệu thành công!');
+                
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Có lỗi xảy ra khi import: ' . $e->getMessage());
+        }
     }
 }

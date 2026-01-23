@@ -6,9 +6,14 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0"><i class="fas fa-box me-2"></i>Danh sách Sản phẩm</h5>
-        <a href="{{ route('san-pham.create') }}" class="btn btn-primary btn-sm">
-            <i class="fas fa-plus me-1"></i>Thêm sản phẩm
-        </a>
+        <div>
+            <a href="{{ route('san-pham.import.form') }}" class="btn btn-success btn-sm me-2">
+                <i class="fas fa-file-excel me-1"></i>Import Excel
+            </a>
+            <a href="{{ route('san-pham.create') }}" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus me-1"></i>Thêm sản phẩm
+            </a>
+        </div>
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -34,12 +39,12 @@
                         <td>{{ $sanPhams->firstItem() + $index }}</td>
                         <td>{{ $sp->ten_san_pham }}</td>
                         <td>{{ $sp->dvt }}</td>
-                        <td class="text-end">{{ number_format($sp->gia_nhap, 0, ',', '.') }}</td>
-                        <td class="text-end">{{ number_format($sp->gia_ban, 0, ',', '.') }}</td>
-                        <td class="text-end">{{ number_format($sp->gia_ban_le, 0, ',', '.') }}</td>
-                        <td class="text-center">{{ $sp->so_luong ?? 0 }}</td>
-                        <td class="text-center">{{ $sp->ti_so_chuyen_doi ?? 1 }}</td>
-                        <td class="text-center">{{ $sp->so_luong_don_vi ?? 0 }}</td>
+                        <td class="text-end">{{ number_format($sp->gia_nhap, 0, ',', '.') }}đ</td>
+                        <td class="text-end">{{ number_format($sp->gia_ban, 0, ',', '.') }}đ</td>
+                        <td class="text-end">{{ number_format($sp->gia_ban_le, 0, ',', '.') }}đ</td>
+                        <td class="text-center">{{ number_format($sp->so_luong ?? 0, 2, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($sp->ti_so_chuyen_doi ?? 1, 2, ',', '.') }}</td>
+                        <td class="text-center">{{ number_format($sp->so_luong_don_vi ?? 0, 2, ',', '.') }}</td>
                         <td>{{ $sp->ghi_chu ? Str::limit($sp->ghi_chu, 30) : '-' }}</td>
                         <td class="text-center">
                             <a href="{{ route('san-pham.edit', $sp) }}" class="btn btn-warning btn-action" title="Sửa">
