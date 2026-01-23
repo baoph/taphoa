@@ -15,6 +15,10 @@ Route::resource('san-pham', SanPhamController::class)->parameters([
 ]);
 Route::get('api/san-pham/search', [SanPhamController::class, 'search'])->name('san-pham.search');
 
+// Import Excel
+Route::get('san-pham-import', [SanPhamController::class, 'showImportForm'])->name('san-pham.import.form');
+Route::post('san-pham-import', [SanPhamController::class, 'import'])->name('san-pham.import');
+
 // Quản lý đơn hàng
 Route::get('don-hang', [DonHangController::class, 'index'])->name('don-hang.index');
 Route::get('don-hang/list', [DonHangController::class, 'getByDate'])->name('don-hang.list');

@@ -24,8 +24,8 @@ class SanPham extends Model
         'gia_nhap' => 'decimal:0',
         'gia_ban' => 'decimal:0',
         'gia_ban_le' => 'decimal:0',
-        'so_luong' => 'integer',
-        'ti_so_chuyen_doi' => 'integer',
-        'so_luong_don_vi' => 'integer',
+        'so_luong' => 'decimal:2',
+        'ti_so_chuyen_doi' => 'decimal:2',
+        'so_luong_don_vi' => 'decimal:2',
     ];
 }
