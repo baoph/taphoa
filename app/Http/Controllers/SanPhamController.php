@@ -185,6 +185,29 @@ class SanPhamController extends Controller
     }
 
     /**
+     * Hiển thị chi tiết sản phẩm
+     */
+    public function show(int $id)
+    {
+        $sanPham = SanPham::with('sanPhamDonVi.donViBan')->findOrFail($id);
+        return view('san-pham.show', compact('sanPham'));
+    }
+
+    /**
+     * API: Lấy danh sách đơn vị bán của sản phẩm
+     */
+    public function getDonViOptions(int $id)
+    {
+        $sanPham = SanPham::findOrFail($id);
+        $options = $sanPham->getDonViOptions();
+
+        return response()->json([
+            'success' => true,
+            'data' => $options,
+        ]);
+    }
+
+    /**
      * Hiển thị form import Excel
      */
     public function showImportForm()

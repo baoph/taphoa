@@ -39,10 +39,36 @@ class DonHangController extends Controller
         $request->validate([
             'san_pham_id' => 'nullable|exists:san_pham,id',
             'ten_san_pham' => 'required|string|max:255',
-            'so_luong' => 'required|integer|min:1',
+            'so_luong' => 'required|numeric|min:0.01',
             'gia' => 'required|numeric|min:0',
             'ngay_ban' => 'required|date',
+            'don_vi_ban_id' => 'nullable|exists:don_vi_ban,id',
         ]);
+
+        // Tính số lượng quy đổi về đơn vị cơ bản
+        $soLuongQuyDoi = $request->so_luong;
+        if ($request->don_vi_ban_id && $request->san_pham_id) {
+            $sanPhamDonVi = \App\Models\SanPhamDonVi::where('san_pham_id', $request->san_pham_id)
+                ->where('don_vi_ban_id', $request->don_vi_ban_id)
+                ->first();
+            
+            if ($sanPhamDonVi) {
+                $soLuongQuyDoi = $request->so_luong * $sanPhamDonVi->ti_le_quy_doi;
+            }
+        }
+
+        // Trừ tồn kho
+        if ($request->san_pham_id) {
+            $sanPham = SanPham::find($request->san_pham_id);
+            if ($sanPham) {
+                if (!$sanPham->truTonKho($soLuongQuyDoi)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Không đủ hàng trong kho!',
+                    ], 422);
+                }
+            }
+        }
 
         $donHang = DonHang::create([
             'san_pham_id' => $request->san_pham_id,
@@ -50,6 +76,8 @@ class DonHangController extends Controller
             'so_luong' => $request->so_luong,
             'gia' => $request->gia,
             'ngay_ban' => $request->ngay_ban,
+            'don_vi_ban_id' => $request->don_vi_ban_id,
+            'so_luong_quy_doi' => $soLuongQuyDoi,
         ]);
 
         return response()->json([
@@ -93,10 +121,44 @@ class DonHangController extends Controller
         $request->validate([
             'san_pham_id' => 'nullable|exists:san_pham,id',
             'ten_san_pham' => 'required|string|max:255',
-            'so_luong' => 'required|integer|min:1',
+            'so_luong' => 'required|numeric|min:0.01',
             'gia' => 'required|numeric|min:0',
             'ngay_ban' => 'required|date',
+            'don_vi_ban_id' => 'nullable|exists:don_vi_ban,id',
         ]);
+
+        // Hoàn lại tồn kho cũ
+        if ($donHang->san_pham_id && $donHang->so_luong_quy_doi > 0) {
+            $sanPham = SanPham::find($donHang->san_pham_id);
+            if ($sanPham) {
+                $sanPham->congTonKho($donHang->so_luong_quy_doi);
+            }
+        }
+
+        // Tính số lượng quy đổi mới
+        $soLuongQuyDoi = $request->so_luong;
+        if ($request->don_vi_ban_id && $request->san_pham_id) {
+            $sanPhamDonVi = \App\Models\SanPhamDonVi::where('san_pham_id', $request->san_pham_id)
+                ->where('don_vi_ban_id', $request->don_vi_ban_id)
+                ->first();
+            
+            if ($sanPhamDonVi) {
+                $soLuongQuyDoi = $request->so_luong * $sanPhamDonVi->ti_le_quy_doi;
+            }
+        }
+
+        // Trừ tồn kho mới
+        if ($request->san_pham_id) {
+            $sanPham = SanPham::find($request->san_pham_id);
+            if ($sanPham) {
+                if (!$sanPham->truTonKho($soLuongQuyDoi)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Không đủ hàng trong kho!',
+                    ], 422);
+                }
+            }
+        }
 
         $donHang->update([
             'san_pham_id' => $request->san_pham_id,
@@ -104,6 +166,8 @@ class DonHangController extends Controller
             'so_luong' => $request->so_luong,
             'gia' => $request->gia,
             'ngay_ban' => $request->ngay_ban,
+            'don_vi_ban_id' => $request->don_vi_ban_id,
+            'so_luong_quy_doi' => $soLuongQuyDoi,
         ]);
 
         return response()->json([
@@ -125,6 +189,14 @@ class DonHangController extends Controller
      */
     public function destroy(DonHang $donHang)
     {
+        // Hoàn lại tồn kho
+        if ($donHang->san_pham_id && $donHang->so_luong_quy_doi > 0) {
+            $sanPham = SanPham::find($donHang->san_pham_id);
+            if ($sanPham) {
+                $sanPham->congTonKho($donHang->so_luong_quy_doi);
+            }
+        }
+
         $donHang->delete();
 
         return response()->json([
