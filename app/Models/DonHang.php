@@ -46,6 +46,14 @@ class DonHang extends Model
     /**
      * Relationship: Đơn hàng thuộc về một đơn vị bán
      */
+    public function sanPhamDonVi(): BelongsTo
+    {
+        return $this->belongsTo(SanPhamDonVi::class, 'don_vi_ban_id');
+    }
+
+    /**
+     * Relationship: Đơn hàng thuộc về một đơn vị bán
+     */
     public function donViBan(): BelongsTo
     {
         return $this->belongsTo(DonViBan::class, 'don_vi_ban_id');

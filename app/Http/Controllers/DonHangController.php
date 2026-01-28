@@ -21,7 +21,7 @@ class DonHangController extends Controller
         $isFiltering = $tuNgay || $denNgay || $sanPhamId;
 
         // Build query
-        $query = DonHang::with('donViBan');
+        $query = DonHang::with('sanPhamDonVi.donViBan');
 
         if ($isFiltering) {
             // Filter theo khoảng thời gian
@@ -78,7 +78,7 @@ class DonHangController extends Controller
             $sanPhamDonVi = \App\Models\SanPhamDonVi::where('san_pham_id', $request->san_pham_id)
                 ->where('don_vi_ban_id', $request->don_vi_ban_id)
                 ->first();
-            
+
             if ($sanPhamDonVi) {
                 $soLuongQuyDoi = $request->so_luong * $sanPhamDonVi->ti_le_quy_doi;
             }
@@ -168,7 +168,7 @@ class DonHangController extends Controller
             $sanPhamDonVi = \App\Models\SanPhamDonVi::where('san_pham_id', $request->san_pham_id)
                 ->where('don_vi_ban_id', $request->don_vi_ban_id)
                 ->first();
-            
+
             if ($sanPhamDonVi) {
                 $soLuongQuyDoi = $request->so_luong * $sanPhamDonVi->ti_le_quy_doi;
             }

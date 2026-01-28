@@ -78,7 +78,7 @@
                     <tr data-id="{{ $dh->id }}">
                         <td>{{ $index + 1 }}</td>
                         <td>{{ $dh->ten_san_pham }}</td>
-                        <td class="text-center">{{ $dh->so_luong }} {{ $dh->donViBan->ten_don_vi ?? '' }}</td>
+                        <td class="text-center">{{ $dh->so_luong }} {{ $dh->sanPhamDonVi->donViBan->ten_don_vi ?? '' }}</td>
                         <td class="text-end">{{ number_format($dh->gia, 0, ',', '.') }}</td>
                         <td class="text-end">{{ number_format($dh->so_luong * $dh->gia, 0, ',', '.') }}</td>
                         <td class="text-center">
@@ -297,7 +297,7 @@
             html = '<tr id="emptyRow"><td colspan="6" class="text-center text-muted">Chưa có đơn hàng nào trong ngày</td></tr>';
         } else {
             data.forEach(function(dh, index) {
-                const donViTen = dh.don_vi_ban?.ten_don_vi ?? '';
+                const donViTen = dh.san_pham_don_vi.don_vi_ban?.ten_don_vi ?? '';
                 html += `
                     <tr data-id="${dh.id}">
                         <td>${index + 1}</td>
