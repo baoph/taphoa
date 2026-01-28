@@ -2,13 +2,13 @@
 <tr>
     <td>{{ $sanPhams->firstItem() + $index }}</td>
     <td>{{ $sp->ten_san_pham }}</td>
-    <td>{{ $sp->dv_nhap_hang }}</td>
+    <td>{{ $sp->dv_nhap_hang_text }}</td>
     <td class="text-end">{{ number_format($sp->gia_nhap, 0, ',', '.') }}đ</td>
     <td class="text-end">{{ number_format($sp->gia_ban, 0, ',', '.') }}đ</td>
     <td class="text-end">{{ number_format($sp->gia_ban_le, 0, ',', '.') }}đ</td>
-    <td class="text-center">{{ number_format($sp->so_luong ?? 0, 2, ',', '.') }}</td>
-    <td class="text-center">{{ number_format($sp->ti_so_chuyen_doi ?? 1, 2, ',', '.') }}</td>
-    <td class="text-center">{{ number_format($sp->so_luong_don_vi ?? 0, 2, ',', '.') }}</td>
+    <!-- <td class="text-center">{{ number_format($sp->so_luong ?? 0, 2, ',', '.') }}</td> -->
+    <!-- <td class="text-center">{{ number_format($sp->ti_so_chuyen_doi ?? 1, 2, ',', '.') }}</td> -->
+    <td class="text-center">{{ $sp->ton_kho_hien_thi }}</td>
     <td class="text-center">
         @if($sp->sanPhamDonVi->count() > 0)
             <span class="badge bg-success">{{ $sp->sanPhamDonVi->count() }} đơn vị</span>

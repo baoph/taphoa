@@ -6,6 +6,7 @@ use App\Models\SanPham;
 use App\Models\DonViTinh;
 use Illuminate\Http\Request;
 use App\Imports\SanPhamImport;
+use App\Models\DonViBan;
 use Maatwebsite\Excel\Facades\Excel;
 
 class SanPhamController extends Controller
@@ -22,7 +23,10 @@ class SanPhamController extends Controller
             })
             ->orderBy('ten_san_pham')
             ->paginate(15);
+        // foreach($sanPhams as $sp) {
 
+        //     dd($sp->ton_kho_hien_thi);
+        // }
         if ($request->ajax()) {
             return view('san-pham.partials.table', compact('sanPhams'))->render();
         }
@@ -55,8 +59,8 @@ class SanPhamController extends Controller
      */
     public function create()
     {
-        $donViTinhs = DonViTinh::orderBy('ten_don_vi')->get();
-        return view('san-pham.create', compact('donViTinhs'));
+        $donViBan = DonViBan::orderBy('ten_don_vi')->get();
+        return view('san-pham.create', compact('donViBan'));
     }
 
     /**
@@ -66,7 +70,7 @@ class SanPhamController extends Controller
     {
         $request->validate([
             'ten_san_pham' => 'required|string|max:255',
-            'dv_nhap_hang' => 'nullable|string|max:50',
+            'dv_nhap_hang' => 'nullable|numeric|max:50',
             'gia_nhap' => 'nullable|numeric|min:0',
             'gia_ban' => 'nullable|numeric|min:0',
             'gia_ban_le' => 'nullable|numeric|min:0',
@@ -93,8 +97,8 @@ class SanPhamController extends Controller
      */
     public function edit(SanPham $sanPham)
     {
-        $donViTinhs = DonViTinh::orderBy('ten_don_vi')->get();
-        return view('san-pham.edit', compact('sanPham', 'donViTinhs'));
+        $donViBan = DonViBan::orderBy('ten_don_vi')->get();
+        return view('san-pham.edit', compact('sanPham', 'donViBan'));
     }
 
     /**
@@ -104,7 +108,7 @@ class SanPhamController extends Controller
     {
         $request->validate([
             'ten_san_pham' => 'required|string|max:255',
-            'dv_nhap_hang' => 'nullable|string|max:50',
+            'dv_nhap_hang' => 'nullable|numeric|max:50',
             'gia_nhap' => 'nullable|numeric|min:0',
             'gia_ban' => 'nullable|numeric|min:0',
             'gia_ban_le' => 'nullable|numeric|min:0',

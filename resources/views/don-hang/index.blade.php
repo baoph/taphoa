@@ -73,7 +73,7 @@
                 <form id="donHangForm">
                     <input type="hidden" id="donHangId">
                     <input type="hidden" id="sanPhamId">
-                    
+
                     <!-- Chọn sản phẩm -->
                     <div class="mb-3">
                         <label for="tenSanPham" class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
@@ -103,9 +103,9 @@
                     <!-- Hiển thị tương đương -->
                     <div class="mb-3">
                         <div class="alert alert-secondary py-2">
-                            <i class="fas fa-calculator"></i> 
-                            <strong>Tương đương:</strong> 
-                            <span id="tuongDuong" class="text-primary fw-bold">0</span> 
+                            <i class="fas fa-calculator"></i>
+                            <strong>Tương đương:</strong>
+                            <span id="tuongDuong" class="text-primary fw-bold">0</span>
                             <span id="donViCoBan" class="text-muted"></span>
                         </div>
                     </div>
@@ -180,7 +180,7 @@
         $('#giaBan').val(0);
         $('#thanhTienPreview').text('0đ');
         $('#modalTitle').html('<i class="fas fa-plus me-2"></i>Thêm đơn hàng');
-        
+
         // Reset MultiUnitHandler
         MultiUnitHandler.resetForm();
     }
@@ -194,6 +194,7 @@
         const id = $('#donHangId').val();
         const data = {
             san_pham_id: $('#sanPhamId').val(),
+            ten_san_pham: $('#tenSanPham').text(),
             don_vi_ban_id: $('#donViBanId').val(),
             so_luong: $('#soLuong').val(),
             gia: $('#giaBan').val(),
@@ -269,10 +270,10 @@
                 const dh = response.data;
                 $('#donHangId').val(dh.id);
                 $('#sanPhamId').val(dh.san_pham_id || '');
-                
+
                 const option = new Option(dh.ten_san_pham, dh.san_pham_id || dh.ten_san_pham, true, true);
                 $('#tenSanPham').append(option).trigger('change');
-                
+
                 $('#soLuong').val(dh.so_luong);
                 $('#giaBan').val(dh.gia);
                 $('#modalTitle').html('<i class="fas fa-edit me-2"></i>Sửa đơn hàng');

@@ -243,7 +243,7 @@ const SanPhamDonViManager = {
             method: 'GET',
             success: function(response) {
                 if (response.success) {
-                    self.renderDonViTable(response.data, response.don_vi_co_ban);
+                    self.renderDonViTable(response.data, response.don_vi_co_ban_text);
                 }
             },
             error: function(xhr) {

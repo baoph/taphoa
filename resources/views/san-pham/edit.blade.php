@@ -26,8 +26,8 @@
                         <label for="dv_nhap_hang" class="form-label">Đơn vị nhập hàng</label>
                         <select class="form-select @error('dv_nhap_hang') is-invalid @enderror" id="dv_nhap_hang" name="dv_nhap_hang">
                             <option value="">-- Chọn đơn vị tính --</option>
-                            @foreach($donViTinhs as $donVi)
-                                <option value="{{ $donVi->ten_don_vi }}" {{ old('dv_nhap_hang', $sanPham->dv_nhap_hang) == $donVi->ten_don_vi ? 'selected' : '' }}>
+                            @foreach($donViBan as $donVi)
+                                <option value="{{ $donVi->id }}" {{ old('dv_nhap_hang', $sanPham->dv_nhap_hang) == $donVi->id ? 'selected' : '' }}>
                                     {{ $donVi->ten_don_vi }}
                                 </option>
                             @endforeach
@@ -41,8 +41,8 @@
                         <label for="don_vi_co_ban" class="form-label">Đơn vị cơ bản</label>
                         <select class="form-select @error('don_vi_co_ban') is-invalid @enderror" id="don_vi_co_ban" name="don_vi_co_ban">
                             <option value="">-- Chọn đơn vị cơ bản --</option>
-                            @foreach($donViTinhs as $donVi)
-                                <option value="{{ $donVi->ten_don_vi }}" {{ old('don_vi_co_ban', $sanPham->don_vi_co_ban) == $donVi->ten_don_vi ? 'selected' : '' }}>
+                            @foreach($donViBan as $donVi)
+                                <option value="{{ $donVi->id }}" {{ old('don_vi_co_ban', $sanPham->don_vi_co_ban) == $donVi->id ? 'selected' : '' }}>
                                     {{ $donVi->ten_don_vi }}
                                 </option>
                             @endforeach

@@ -21,7 +21,7 @@ class SanPhamDonViController extends Controller
         return response()->json([
             'success' => true,
             'data' => $donViList,
-            'don_vi_co_ban' => $sanPham->don_vi_co_ban,
+            'don_vi_co_ban_text' => $sanPham->don_vi_co_ban_text,
         ]);
     }
 
@@ -79,8 +79,8 @@ class SanPhamDonViController extends Controller
         $validated = $request->validate([
             'ti_le_quy_doi' => 'required|numeric|min:0.01',
             'gia_ban' => 'required|numeric|min:0',
+            'don_vi_ban_id' => 'required|numeric|min:0',
         ]);
-
         $sanPhamDonVi->update($validated);
         $sanPhamDonVi->load('donViBan');
 

@@ -38,13 +38,13 @@
                     <tr>
                         <th style="width: 60px;">STT</th>
                         <th>Tên sản phẩm</th>
-                        <th style="width: 80px;">dv_nhap_hang</th>
+                        <th style="width: 80px;">ĐVT nhập hàng</th>
                         <th style="width: 100px;" class="text-end">Giá nhập</th>
                         <th style="width: 100px;" class="text-end">Giá bán</th>
                         <th style="width: 100px;" class="text-end">Giá bán lẻ</th>
-                        <th style="width: 80px;" class="text-center">Số lượng</th>
-                        <th style="width: 80px;" class="text-center">Tỉ số</th>
-                        <th style="width: 80px;" class="text-center">SL đơn vị</th>
+                        <!-- <th style="width: 80px;" class="text-center">Số lượng</th> -->
+                        <!-- <th style="width: 80px;" class="text-center">Tỉ số</th> -->
+                        <th style="width: 80px;" class="text-center">Tồn kho</th>
                         <th style="width: 100px;" class="text-center">Đơn vị bán</th>
                         <th style="width: 150px;">Ghi chú</th>
                         <th style="width: 150px;" class="text-center">Thao tác</th>

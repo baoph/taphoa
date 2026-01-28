@@ -50,6 +50,55 @@ class SanPham extends Model
         return $this->hasMany(SanPhamDonVi::class, 'san_pham_id');
     }
 
+    public function donViBan(): HasMany
+    {
+        return $this->hasMany(DonViBan::class, 'id', 'dv_nhap_hang');
+    }
+    public function donViCoBan(): HasMany
+    {
+        return $this->hasMany(DonViBan::class, 'id', 'don_vi_co_ban');
+    }
+
+    public function getDvNhapHangTextAttribute()
+    {
+        $donVi = DonViBan::find($this->dv_nhap_hang);
+        return $donVi ? $donVi->ten_don_vi : '';
+    }
+    public function getDonViCoBanTextAttribute()
+    {
+        $donVi = DonViBan::find($this->don_vi_co_ban);
+        return $donVi ? $donVi->ten_don_vi : '';
+    }
+
+    public function getTonKhoHienThiAttribute()
+    {
+        $tongSoLuong = $this->so_luong ?? 0; // tồn kho theo đơn vị cơ bản
+
+        // đơn vị nhập hàng
+        $donViNhap = $this->sanPhamDonVi
+            ->where('don_vi_ban_id', $this->dv_nhap_hang)
+            ->first();
+        if (!$donViNhap || $donViNhap->ti_le_quy_doi <= 0) {
+            return number_format($tongSoLuong, 0, ',', '.') . ' ' . $this->don_vi_co_ban;
+        }
+        $tiSo = $donViNhap->ti_le_quy_doi;
+
+        $soLuongNhap = intdiv($tongSoLuong, $tiSo);
+        $soLuongLe   = $tongSoLuong % $tiSo;
+        $donViNhapTen = $this->donViBan()->where('id', $this->dv_nhap_hang)->first()->ten_don_vi;
+        $donViCoBanTen = $this->donViCoBan()->where('id', $this->don_vi_co_ban)->first()->ten_don_vi;
+        $ketQua = [];
+        if ($soLuongNhap > 0) {
+            $ketQua[] = $soLuongNhap . ' ' . $donViNhapTen;
+        }
+
+        if ($soLuongLe > 0) {
+            $ketQua[] = $soLuongLe . ' ' . $donViCoBanTen;
+        }
+
+        return implode(' ', $ketQua);
+    }
+
     /**
      * Lấy danh sách đơn vị bán của sản phẩm
      */

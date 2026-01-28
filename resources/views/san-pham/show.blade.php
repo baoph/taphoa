@@ -33,11 +33,11 @@
                         </tr>
                         <tr>
                             <th>Đơn vị nhập hàng:</th>
-                            <td>{{ $sanPham->dv_nhap_hang }}</td>
+                            <td>{{ $sanPham->dv_nhap_hang_text }}</td>
                         </tr>
                         <tr>
                             <th>Đơn vị cơ bản:</th>
-                            <td><span class="badge bg-primary">{{ $sanPham->don_vi_co_ban }}</span></td>
+                            <td><span class="badge bg-primary">{{ $sanPham->don_vi_co_ban_text }}</span></td>
                         </tr>
                         <tr>
                             <th>Giá nhập:</th>
@@ -64,7 +64,7 @@
                             <td>
                                 <strong class="text-success fs-5">
                                     @if($soDonViNhap > 0)
-                                        {{ $soDonViNhap }} {{ $sanPham->dv_nhap_hang }}
+                                        {{ $soDonViNhap }} {{ $sanPham->dv_nhap_hang_text }}
                                     @endif
 
                                     @if($soDonViNhap > 0 && $soDu > 0)
@@ -72,16 +72,16 @@
                                     @endif
 
                                     @if($soDu > 0)
-                                        {{ $soDu }} {{ $sanPham->don_vi_co_ban }}
+                                        {{ $soDu }} {{ $sanPham->don_vi_co_ban_text }}
                                     @endif
 
                                     @if($soDonViNhap == 0 && $soDu == 0)
-                                        0 {{ $sanPham->don_vi_co_ban }}
+                                        0 {{ $sanPham->don_vi_co_ban_text }}
                                     @endif
                                 </strong>
 
                                 <div class="text-muted small">
-                                    ({{ $soLuong }} {{ $sanPham->don_vi_co_ban }})
+                                    ({{ $soLuong }} {{ $sanPham->don_vi_co_ban_text }})
                                 </div>
                             </td>
                         </tr>
@@ -120,7 +120,7 @@
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
                                         <td><strong>{{ $spDonVi->donViBan->ten_don_vi }}</strong></td>
-                                        <td>{{ $spDonVi->ti_le_quy_doi }} {{ $sanPham->don_vi_co_ban }}</td>
+                                        <td>{{ $spDonVi->ti_le_quy_doi }} {{ $sanPham->don_vi_co_ban_text }}</td>
                                         <td class="text-end">{{ number_format($spDonVi->gia_ban) }} đ</td>
                                         <td class="text-center">
                                             <button type="button" class="btn btn-sm btn-warning"
@@ -186,10 +186,10 @@
                         <div class="input-group">
                             <input type="number" class="form-control" id="tiLeQuyDoi"
                                    min="0.01" step="0.01" placeholder="Ví dụ: 24" required>
-                            <span class="input-group-text">{{ $sanPham->don_vi_co_ban }}</span>
+                            <span class="input-group-text">{{ $sanPham->don_vi_co_ban_text }}</span>
                         </div>
                         <div class="form-text">
-                            Ví dụ: 1 Thùng = 24 {{ $sanPham->don_vi_co_ban }}
+                            Ví dụ: 1 Thùng = 24 {{ $sanPham->don_vi_co_ban_text }}
                         </div>
                     </div>
 

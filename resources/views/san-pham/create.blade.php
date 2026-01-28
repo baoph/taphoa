@@ -26,8 +26,8 @@
                         <label for="dv_nhap_hang" class="form-label">Đơn vị tính</label>
                         <select class="form-select @error('dv_nhap_hang') is-invalid @enderror" id="dv_nhap_hang" name="dv_nhap_hang">
                             <option value="">-- Chọn đơn vị tính --</option>
-                            @foreach($donViTinhs as $donVi)
-                                <option value="{{ $donVi->ten_don_vi }}" {{ old('dv_nhap_hang') == $donVi->ten_don_vi ? 'selected' : '' }}>
+                            @foreach($donViBan as $donVi)
+                                <option value="{{ $donVi->id }}" {{ old('dv_nhap_hang') == $donVi->id ? 'selected' : '' }}>
                                     {{ $donVi->ten_don_vi }}
                                 </option>
                             @endforeach
