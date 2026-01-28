@@ -86,53 +86,21 @@ const MultiUnitHandler = {
             success: function(response) {
                 console.log('Don vi options loaded:', response);
                 
-                // Kiểm tra response có đúng cấu trúc không
-                if (!response || typeof response !== 'object') {
-                    console.error('Invalid response format:', response);
-                    toastr.error('Dữ liệu trả về không hợp lệ');
-                    self.resetDonViDropdown();
-                    return;
-                }
-                
                 if (response.success) {
-                    // Kiểm tra response.data tồn tại
-                    if (!response.data) {
-                        console.error('Missing response.data:', response);
-                        toastr.error('Thiếu dữ liệu sản phẩm');
-                        self.resetDonViDropdown();
-                        return;
-                    }
-
-                    // Kiểm tra response.data.san_pham tồn tại
-                    if (!response.data.san_pham) {
-                        console.error('Missing response.data.san_pham:', response.data);
-                        toastr.error('Thiếu thông tin sản phẩm');
-                        self.resetDonViDropdown();
-                        return;
-                    }
-
-                    // Lưu thông tin sản phẩm với giá trị mặc định
                     self.currentSanPham = response.data.san_pham;
-                    self.currentDonViList = response.data.don_vi_list || [];
-                    self.currentTonKho = parseFloat(response.data.san_pham.so_luong_ton_kho) || 0;
-                    self.currentDonViCoBan = response.data.san_pham.don_vi_co_ban || 'cái';
-                    
-                    console.log('Loaded product info:', {
-                        sanPham: self.currentSanPham,
-                        tonKho: self.currentTonKho,
-                        donViCoBan: self.currentDonViCoBan,
-                        donViList: self.currentDonViList
-                    });
+                    self.currentDonViList = response.data.don_vi_list;
+                    self.currentTonKho = response.data.san_pham.so_luong_ton_kho;
+                    self.currentDonViCoBan = response.data.san_pham.don_vi_co_ban;
                     
                     // Populate dropdown
-                    self.populateDonViDropdown(response.data.don_vi_list || []);
+                    self.populateDonViDropdown(response.data.don_vi_list);
                     
                     // Hiển thị thông tin tồn kho
                     self.updateTonKhoDisplay();
                     
                     // Tự động chọn đơn vị đầu tiên nếu có
-                    if (self.currentDonViList.length > 0) {
-                        $('#donViBanId').val(self.currentDonViList[0].id).trigger('change');
+                    if (response.data.don_vi_list.length > 0) {
+                        $('#donViBanId').val(response.data.don_vi_list[0].id).trigger('change');
                     }
                 } else {
                     toastr.error(response.message || 'Không thể load đơn vị bán');
@@ -141,17 +109,7 @@ const MultiUnitHandler = {
             },
             error: function(xhr) {
                 console.error('Error loading don vi options:', xhr);
-                
-                let errorMessage = 'Có lỗi khi tải đơn vị bán';
-                if (xhr.responseJSON && xhr.responseJSON.message) {
-                    errorMessage = xhr.responseJSON.message;
-                } else if (xhr.status === 404) {
-                    errorMessage = 'Không tìm thấy sản phẩm';
-                } else if (xhr.status === 500) {
-                    errorMessage = 'Lỗi server, vui lòng thử lại';
-                }
-                
-                toastr.error(errorMessage);
+                toastr.error('Có lỗi khi tải đơn vị bán');
                 self.resetDonViDropdown();
             }
         });
@@ -165,7 +123,7 @@ const MultiUnitHandler = {
         const $select = $('#donViBanId');
         $select.empty().prop('disabled', false);
 
-        if (!donViList || donViList.length === 0) {
+        if (donViList.length === 0) {
             $select.html('<option value="">Chưa có đơn vị bán</option>');
             toastr.warning('Sản phẩm này chưa có đơn vị bán. Vui lòng thêm đơn vị bán trước.');
             return;
@@ -176,7 +134,7 @@ const MultiUnitHandler = {
 
         // Thêm các option đơn vị
         donViList.forEach(function(donVi) {
-            const label = `${donVi.ten_don_vi} (${donVi.ti_le_quy_doi} ${donVi.don_vi_co_ban || MultiUnitHandler.currentDonViCoBan}) - ${MultiUnitHandler.formatCurrency(donVi.gia_ban)}`;
+            const label = `${donVi.ten_don_vi} (${donVi.ti_le_quy_doi} ${donVi.don_vi_co_ban}) - ${MultiUnitHandler.formatCurrency(donVi.gia_ban)}`;
             $select.append(`<option value="${donVi.id}" 
                                     data-ti-le="${donVi.ti_le_quy_doi}" 
                                     data-gia="${donVi.gia_ban}"
@@ -192,7 +150,6 @@ const MultiUnitHandler = {
         $('#tonKhoInfo').html('');
         $('#tuongDuong').text('0');
         $('#donViCoBan').text('');
-        this.currentSanPham = null;
         this.currentDonViList = [];
         this.currentTonKho = 0;
         this.currentDonViCoBan = '';
