@@ -74,6 +74,7 @@
                     <input type="hidden" id="donHangId">
                     <input type="hidden" id="sanPhamId">
                     
+                    <!-- Chọn sản phẩm -->
                     <div class="mb-3">
                         <label for="tenSanPham" class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
                         <select id="tenSanPham" class="form-select" style="width: 100%;">
@@ -81,23 +82,45 @@
                         </select>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="soLuong" class="form-label">
-                                Số lượng <span id="dvtLabel" class="text-muted"></span> <span class="text-danger">*</span>
-                            </label>
-                            <input type="number" class="form-control" id="soLuong" min="1" value="1" required>
-                        </div>
+                    <!-- Chọn đơn vị bán -->
+                    <div class="mb-3">
+                        <label for="donViBanId" class="form-label">Đơn vị bán <span class="text-danger">*</span></label>
+                        <select id="donViBanId" class="form-select" disabled>
+                            <option value="">-- Chọn sản phẩm trước --</option>
+                        </select>
+                        <div class="form-text">Chọn đơn vị bán (thùng, lốc, lon...)</div>
+                    </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label for="giaBan" class="form-label">Giá bán (đ) <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="giaBan" min="0" value="0" required>
+                    <!-- Thông tin tồn kho -->
+                    <div class="mb-3" id="tonKhoInfo"></div>
+
+                    <!-- Số lượng -->
+                    <div class="mb-3">
+                        <label for="soLuong" class="form-label">Số lượng <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="soLuong" min="1" value="1" required>
+                    </div>
+
+                    <!-- Hiển thị tương đương -->
+                    <div class="mb-3">
+                        <div class="alert alert-secondary py-2">
+                            <i class="fas fa-calculator"></i> 
+                            <strong>Tương đương:</strong> 
+                            <span id="tuongDuong" class="text-primary fw-bold">0</span> 
+                            <span id="donViCoBan" class="text-muted"></span>
                         </div>
                     </div>
 
+                    <!-- Giá bán -->
+                    <div class="mb-3">
+                        <label for="giaBan" class="form-label">Giá bán (đ) <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="giaBan" min="0" value="0" required>
+                        <div class="form-text">Giá sẽ tự động điền theo đơn vị, có thể chỉnh sửa</div>
+                    </div>
+
+                    <!-- Thành tiền -->
                     <div class="mb-3">
                         <label class="form-label">Thành tiền:</label>
-                        <div class="form-control-plaintext fw-bold text-primary" id="thanhTienPreview">0 đ</div>
+                        <div class="form-control-plaintext fw-bold text-primary fs-5" id="thanhTienPreview">0đ</div>
                     </div>
                 </form>
             </div>
@@ -115,12 +138,15 @@
 @endsection
 
 @push('scripts')
+<script src="{{ asset('js/multi-unit-handler.js') }}"></script>
 <script>
     let currentNgay = '{{ $ngay }}';
-    let currentDvt = '';
 
     $(document).ready(function() {
-        // Initialize Select2
+        // Khởi tạo MultiUnitHandler
+        MultiUnitHandler.init();
+
+        // Initialize Select2 cho sản phẩm
         $('#tenSanPham').select2({
             dropdownParent: $('#donHangModal'),
             theme: 'bootstrap-5',
@@ -137,46 +163,8 @@
                     return data;
                 },
                 cache: true
-            },
-            tags: true,
-            createTag: function(params) {
-                return {
-                    id: params.term,
-                    text: params.term,
-                    newTag: true
-                };
             }
         });
-
-        // When select product, auto-fill price and show DVT
-        $('#tenSanPham').on('select2:select', function(e) {
-            const data = e.params.data;
-            
-            // Lưu san_pham_id nếu có
-            if (data.id && !data.newTag) {
-                $('#sanPhamId').val(data.id);
-            } else {
-                $('#sanPhamId').val('');
-            }
-            
-            // Auto-fill giá bán
-            if (data.gia_ban) {
-                $('#giaBan').val(data.gia_ban);
-                updateThanhTien();
-            }
-            
-            // Hiển thị đơn vị tính
-            if (data.dvt) {
-                currentDvt = data.dvt;
-                $('#dvtLabel').text('(' + data.dvt + ')');
-            } else {
-                currentDvt = '';
-                $('#dvtLabel').text('');
-            }
-        });
-
-        // Update thanh tien preview
-        $('#soLuong, #giaBan').on('input', updateThanhTien);
 
         // Change date
         $('#ngayBan').on('change', function() {
@@ -185,30 +173,62 @@
         });
     });
 
-    function updateThanhTien() {
-        const soLuong = parseInt($('#soLuong').val()) || 0;
-        const gia = parseInt($('#giaBan').val()) || 0;
-        const thanhTien = soLuong * gia;
-        $('#thanhTienPreview').text(formatNumber(thanhTien) + ' đ');
-    }
-
     function resetForm() {
         $('#donHangId').val('');
-        $('#sanPhamId').val('');
         $('#tenSanPham').val(null).trigger('change');
         $('#soLuong').val(1);
         $('#giaBan').val(0);
-        $('#thanhTienPreview').text('0 đ');
-        $('#dvtLabel').text('');
-        currentDvt = '';
+        $('#thanhTienPreview').text('0đ');
         $('#modalTitle').html('<i class="fas fa-plus me-2"></i>Thêm đơn hàng');
+        
+        // Reset MultiUnitHandler
+        MultiUnitHandler.resetForm();
+    }
+
+    function saveDonHang() {
+        // Validate bằng MultiUnitHandler
+        if (!MultiUnitHandler.validateBeforeSubmit()) {
+            return;
+        }
+
+        const id = $('#donHangId').val();
+        const data = {
+            san_pham_id: $('#sanPhamId').val(),
+            don_vi_ban_id: $('#donViBanId').val(),
+            so_luong: $('#soLuong').val(),
+            gia: $('#giaBan').val(),
+            ngay_ban: currentNgay
+        };
+
+        const url = id ? `/don-hang/${id}` : '{{ route("don-hang.store") }}';
+        const method = id ? 'PUT' : 'POST';
+
+        $.ajax({
+            url: url,
+            method: method,
+            data: data,
+            success: function(response) {
+                if (response.success) {
+                    $('#donHangModal').modal('hide');
+                    loadDonHang();
+                    toastr.success(response.message);
+                }
+            },
+            error: function(xhr) {
+                const errors = xhr.responseJSON?.errors;
+                if (errors) {
+                    toastr.error(Object.values(errors).flat().join('<br>'));
+                } else {
+                    toastr.error('Có lỗi xảy ra!');
+                }
+            }
+        });
     }
 
     function loadDonHang() {
         $.get('{{ route("don-hang.index") }}', { ngay: currentNgay }, function(response) {
             if (response.donHangs) {
                 renderTable(response.donHangs, response.tongTien);
-                // Update URL
                 window.history.pushState({}, '', '{{ route("don-hang.index") }}?ngay=' + currentNgay);
             }
         });
@@ -243,51 +263,6 @@
         $('#tongTien').text(formatNumber(tongTien));
     }
 
-    function saveDonHang() {
-        const id = $('#donHangId').val();
-        const sanPhamId = $('#sanPhamId').val();
-        const tenSanPham = $('#tenSanPham').val();
-        const soLuong = $('#soLuong').val();
-        const gia = $('#giaBan').val();
-
-        if (!tenSanPham) {
-            toastr.warning('Vui lòng chọn sản phẩm!');
-            return;
-        }
-
-        const data = {
-            san_pham_id: sanPhamId || null,
-            ten_san_pham: tenSanPham,
-            so_luong: soLuong,
-            gia: gia,
-            ngay_ban: currentNgay
-        };
-
-        const url = id ? `/don-hang/${id}` : '{{ route("don-hang.store") }}';
-        const method = id ? 'PUT' : 'POST';
-
-        $.ajax({
-            url: url,
-            method: method,
-            data: data,
-            success: function(response) {
-                if (response.success) {
-                    $('#donHangModal').modal('hide');
-                    loadDonHang();
-                    toastr.success(response.message);
-                }
-            },
-            error: function(xhr) {
-                const errors = xhr.responseJSON?.errors;
-                if (errors) {
-                    toastr.error(Object.values(errors).flat().join('<br>'));
-                } else {
-                    toastr.error('Có lỗi xảy ra!');
-                }
-            }
-        });
-    }
-
     function editDonHang(id) {
         $.get(`/don-hang/${id}`, function(response) {
             if (response.success) {
@@ -295,13 +270,11 @@
                 $('#donHangId').val(dh.id);
                 $('#sanPhamId').val(dh.san_pham_id || '');
                 
-                // Set Select2 value
                 const option = new Option(dh.ten_san_pham, dh.san_pham_id || dh.ten_san_pham, true, true);
                 $('#tenSanPham').append(option).trigger('change');
                 
                 $('#soLuong').val(dh.so_luong);
                 $('#giaBan').val(dh.gia);
-                updateThanhTien();
                 $('#modalTitle').html('<i class="fas fa-edit me-2"></i>Sửa đơn hàng');
                 $('#donHangModal').modal('show');
             }

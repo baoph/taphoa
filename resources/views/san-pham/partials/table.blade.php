@@ -9,8 +9,18 @@
     <td class="text-center">{{ number_format($sp->so_luong ?? 0, 2, ',', '.') }}</td>
     <td class="text-center">{{ number_format($sp->ti_so_chuyen_doi ?? 1, 2, ',', '.') }}</td>
     <td class="text-center">{{ number_format($sp->so_luong_don_vi ?? 0, 2, ',', '.') }}</td>
+    <td class="text-center">
+        @if($sp->sanPhamDonVi->count() > 0)
+            <span class="badge bg-success">{{ $sp->sanPhamDonVi->count() }} đơn vị</span>
+        @else
+            <span class="badge bg-secondary">Chưa có</span>
+        @endif
+    </td>
     <td>{{ $sp->ghi_chu ? Str::limit($sp->ghi_chu, 30) : '-' }}</td>
     <td class="text-center">
+        <a href="{{ route('san-pham.show', $sp) }}" class="btn btn-info btn-action" title="Quản lý đơn vị">
+            <i class="bi bi-box-seam"></i>
+        </a>
         <a href="{{ route('san-pham.edit', $sp) }}" class="btn btn-warning btn-action" title="Sửa">
             <i class="fas fa-edit"></i>
         </a>
@@ -25,6 +35,6 @@
 </tr>
 @empty
 <tr>
-    <td colspan="11" class="text-center text-muted">Không tìm thấy sản phẩm nào</td>
+    <td colspan="12" class="text-center text-muted">Không tìm thấy sản phẩm nào</td>
 </tr>
 @endforelse
