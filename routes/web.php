@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SanPhamController;
 use App\Http\Controllers\DonHangController;
+use App\Http\Controllers\NhapHangController;
 use App\Http\Controllers\BaoCaoController;
 use App\Http\Controllers\DonViBanController;
 use App\Http\Controllers\SanPhamDonViController;
@@ -46,6 +47,14 @@ Route::post('don-hang', [DonHangController::class, 'store'])->name('don-hang.sto
 Route::get('don-hang/{donHang}', [DonHangController::class, 'show'])->name('don-hang.show');
 Route::put('don-hang/{donHang}', [DonHangController::class, 'update'])->name('don-hang.update');
 Route::delete('don-hang/{donHang}', [DonHangController::class, 'destroy'])->name('don-hang.destroy');
+
+// Quản lý nhập hàng
+Route::get('nhap-hang', [NhapHangController::class, 'index'])->name('nhap-hang.index');
+Route::post('nhap-hang', [NhapHangController::class, 'store'])->name('nhap-hang.store');
+Route::get('nhap-hang/tong-tien', [NhapHangController::class, 'getTongTienTheoNgay'])->name('nhap-hang.tong-tien');
+Route::get('nhap-hang/{nhapHang}', [NhapHangController::class, 'show'])->name('nhap-hang.show');
+Route::put('nhap-hang/{nhapHang}', [NhapHangController::class, 'update'])->name('nhap-hang.update');
+Route::delete('nhap-hang/{nhapHang}', [NhapHangController::class, 'destroy'])->name('nhap-hang.destroy');
 
 // Báo cáo
 Route::get('bao-cao/doanh-thu', [BaoCaoController::class, 'doanhThu'])->name('bao-cao.doanh-thu');
