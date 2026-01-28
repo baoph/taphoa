@@ -331,6 +331,14 @@
                 const option = new Option(dh.ten_san_pham, dh.san_pham_id || dh.ten_san_pham, true, true);
                 $('#tenSanPham').append(option).trigger('change');
 
+                // Set đơn vị bán nếu có
+                if (dh.don_vi_ban_id) {
+                    // Đợi MultiUnitHandler load xong đơn vị bán
+                    setTimeout(function() {
+                        $('#donViBanId').val(dh.don_vi_ban_id).trigger('change');
+                    }, 500);
+                }
+
                 $('#soLuong').val(dh.so_luong);
                 $('#giaBan').val(dh.gia);
                 $('#modalTitle').html('<i class="fas fa-edit me-2"></i>Sửa đơn hàng');
