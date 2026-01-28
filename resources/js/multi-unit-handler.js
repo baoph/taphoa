@@ -86,21 +86,32 @@ const MultiUnitHandler = {
             success: function(response) {
                 console.log('Don vi options loaded:', response);
                 
-                if (response.success) {
-                    self.currentSanPham = response.data.san_pham;
-                    self.currentDonViList = response.data.don_vi_list;
-                    self.currentTonKho = response.data.san_pham.so_luong_ton_kho;
-                    self.currentDonViCoBan = response.data.san_pham.don_vi_co_ban;
+                if (response.success && response.data) {
+                    const sanPham = response.data.san_pham;
+                    const donViList = response.data.don_vi_list || [];
+                    
+                    // Kiểm tra dữ liệu sản phẩm tồn tại trước khi truy cập thuộc tính
+                    if (!sanPham) {
+                        console.error('Dữ liệu sản phẩm không tồn tại trong response');
+                        toastr.error('Không tìm thấy thông tin sản phẩm');
+                        self.resetDonViDropdown();
+                        return;
+                    }
+                    
+                    self.currentSanPham = sanPham;
+                    self.currentDonViList = donViList;
+                    self.currentTonKho = sanPham.so_luong_ton_kho || 0;
+                    self.currentDonViCoBan = sanPham.don_vi_co_ban || '';
                     
                     // Populate dropdown
-                    self.populateDonViDropdown(response.data.don_vi_list);
+                    self.populateDonViDropdown(donViList);
                     
                     // Hiển thị thông tin tồn kho
                     self.updateTonKhoDisplay();
                     
                     // Tự động chọn đơn vị đầu tiên nếu có
-                    if (response.data.don_vi_list.length > 0) {
-                        $('#donViBanId').val(response.data.don_vi_list[0].id).trigger('change');
+                    if (donViList.length > 0) {
+                        $('#donViBanId').val(donViList[0].id).trigger('change');
                     }
                 } else {
                     toastr.error(response.message || 'Không thể load đơn vị bán');
