@@ -17,7 +17,7 @@ class NhapHangController extends Controller
     {
         $ngay = $request->get('ngay', Carbon::today()->format('Y-m-d'));
 
-        $nhapHangs = NhapHang::whereDate('ngay_nhap', $ngay)
+        $nhapHangs = NhapHang::with('donViBan')->whereDate('ngay_nhap', $ngay)
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -59,7 +59,7 @@ class NhapHangController extends Controller
             $sanPhamDonVi = \App\Models\SanPhamDonVi::where('san_pham_id', $request->san_pham_id)
                 ->where('don_vi_ban_id', $request->don_vi_ban_id)
                 ->first();
-            
+
             if ($sanPhamDonVi) {
                 $soLuongQuyDoi = $request->so_luong * $sanPhamDonVi->ti_le_quy_doi;
             }
@@ -149,7 +149,7 @@ class NhapHangController extends Controller
             $sanPhamDonVi = \App\Models\SanPhamDonVi::where('san_pham_id', $request->san_pham_id)
                 ->where('don_vi_ban_id', $request->don_vi_ban_id)
                 ->first();
-            
+
             if ($sanPhamDonVi) {
                 $soLuongQuyDoi = $request->so_luong * $sanPhamDonVi->ti_le_quy_doi;
             }

@@ -24,9 +24,9 @@ class NhapHang extends Model
     ];
 
     protected $casts = [
-        'gia_nhap' => 'decimal:0',
+        'gia_nhap' => 'integer',
         'ngay_nhap' => 'date',
-        'so_luong_quy_doi' => 'decimal:2',
+        'so_luong_quy_doi' => 'integer',
     ];
 
     /**

@@ -31,7 +31,7 @@
                     <tr data-id="{{ $nh->id }}">
                         <td>{{ $index + 1 }}</td>
                         <td>{{ $nh->ten_san_pham }}</td>
-                        <td class="text-center">{{ $nh->so_luong }}</td>
+                        <td class="text-center">{{ $nh->so_luong }} {{ $nh->donViBan->ten_don_vi ?? '' }}</td>
                         <td class="text-end">{{ number_format($nh->gia_nhap, 0, ',', '.') }}</td>
                         <td class="text-end">{{ number_format($nh->so_luong * $nh->gia_nhap, 0, ',', '.') }}</td>
                         <td class="text-center">
@@ -149,6 +149,8 @@
     let currentNgay = '{{ $ngay }}';
     let currentTiLeQuyDoi = 1;
     let selectedSanPhamId = null;
+    let currentDonViCoBan = '';
+
 
     $(document).ready(function() {
         // Initialize Select2 cho sản phẩm
@@ -176,7 +178,7 @@
             const data = e.params.data;
             selectedSanPhamId = data.id;
             $('#sanPhamId').val(data.id);
-            
+
             // Load đơn vị bán của sản phẩm
             loadDonViBanOptions(data.id);
         });
@@ -220,11 +222,12 @@
         $.get(`/san-pham-don-vi/${sanPhamId}/options`, function(response) {
             if (response.success) {
                 let html = '<option value="">-- Chọn đơn vị --</option>';
-                response.data.forEach(function(item) {
-                    html += `<option value="${item.don_vi_ban_id}" data-ti-le="${item.ti_le_quy_doi}" data-gia="${item.gia_ban}">${item.ten_don_vi} (${item.ti_le_quy_doi} đv cơ bản)</option>`;
+                currentDonViCoBan = response.data.san_pham.don_vi_co_ban_text;
+                response.data.don_vi_list.forEach(function(item){
+                    html += `<option value="${item.don_vi_ban_id}" data-ti-le="${item.ti_le_quy_doi}" data-gia="${item.gia_ban}">${item.ten_don_vi} (${item.ti_le_quy_doi} ${currentDonViCoBan})</option>`;
                 });
                 $('#donViBanId').prop('disabled', false).html(html);
-                
+
                 // Hiển thị thông tin tồn kho
                 if (response.ton_kho_hien_thi) {
                     $('#tonKhoInfo').html(`<div class="alert alert-info py-2"><i class="fas fa-boxes"></i> Tồn kho hiện tại: <strong>${response.ton_kho_hien_thi}</strong></div>`);
@@ -236,12 +239,12 @@
     function updateCalculation() {
         const soLuong = parseFloat($('#soLuong').val()) || 0;
         const giaNhap = parseFloat($('#giaNhap').val()) || 0;
-        
+
         // Tính tương đương
         const tuongDuong = soLuong * currentTiLeQuyDoi;
         $('#tuongDuong').text(tuongDuong);
-        $('#donViCoBan').text('đơn vị cơ bản');
-        
+        $('#donViCoBan').text(currentDonViCoBan);
+
         // Tính thành tiền
         const thanhTien = soLuong * giaNhap;
         $('#thanhTienPreview').text(formatNumber(thanhTien) + 'đ');
@@ -270,7 +273,7 @@
 
     function saveNhapHang() {
         const tenSanPham = $('#tenSanPham').find(':selected').text();
-        
+
         if (!tenSanPham || tenSanPham.trim() === '') {
             toastr.error('Vui lòng chọn sản phẩm!');
             return;
@@ -339,7 +342,7 @@
                     <tr data-id="${nh.id}">
                         <td>${index + 1}</td>
                         <td>${nh.ten_san_pham}</td>
-                        <td class="text-center">${nh.so_luong}</td>
+                        <td class="text-center">${nh.so_luong} ${nh.don_vi_ban?.ten_don_vi ?? ''}</td>
                         <td class="text-end">${formatNumber(nh.gia_nhap)}</td>
                         <td class="text-end">${formatNumber(nh.so_luong * nh.gia_nhap)}</td>
                         <td class="text-center">
