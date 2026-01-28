@@ -100,8 +100,7 @@ const MultiUnitHandler = {
 
                     self.currentDonViList = donViList;
                     self.currentTonKho = sanPham.so_luong || 0;
-                    self.currentDonViCoBan = sanPham.don_vi_co_ban || '';
-
+                    self.currentDonViCoBan = sanPham.don_vi_co_ban_text || '';
                     // Populate dropdown
                     self.populateDonViDropdown(donViList);
 
@@ -154,7 +153,7 @@ const MultiUnitHandler = {
 
         // Thêm các option đơn vị
         donViList.forEach(function(donVi) {
-            const label = `${donVi.ten_don_vi} (${donVi.ti_le_quy_doi} ${donVi.don_vi_co_ban || MultiUnitHandler.currentDonViCoBan}) - ${MultiUnitHandler.formatCurrency(donVi.gia_ban)}`;
+            const label = `${donVi.ten_don_vi} (${donVi.ti_le_quy_doi} ${donVi.don_vi_co_ban_text || MultiUnitHandler.currentDonViCoBan}) - ${MultiUnitHandler.formatCurrency(donVi.gia_ban)}`;
             $select.append(`<option value="${donVi.id}"
                                     data-ti-le="${donVi.ti_le_quy_doi}"
                                     data-gia="${donVi.gia_ban}"

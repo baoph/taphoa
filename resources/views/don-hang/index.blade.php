@@ -192,9 +192,10 @@
         }
 
         const id = $('#donHangId').val();
+        const tenSanPham = $('#tenSanPham').find(':selected').text();
         const data = {
             san_pham_id: $('#sanPhamId').val(),
-            ten_san_pham: $('#tenSanPham').text(),
+            ten_san_pham: tenSanPham,
             don_vi_ban_id: $('#donViBanId').val(),
             so_luong: $('#soLuong').val(),
             gia: $('#giaBan').val(),
