@@ -14,13 +14,60 @@
         </button>
     </div>
     <div class="card-body">
+        <!-- Form tìm kiếm -->
+        <div class="card mb-3 border-success">
+            <div class="card-header bg-success text-white py-2">
+                <i class="fas fa-search me-1"></i>Tìm kiếm
+            </div>
+            <div class="card-body py-2">
+                <form id="searchForm" method="GET" action="{{ route('nhap-hang.index') }}">
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-3">
+                            <label for="tuNgay" class="form-label small mb-1">Từ ngày</label>
+                            <input type="date" class="form-control form-control-sm" id="tuNgay" name="tu_ngay" value="{{ $tuNgay ?? '' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="denNgay" class="form-label small mb-1">Đến ngày</label>
+                            <input type="date" class="form-control form-control-sm" id="denNgay" name="den_ngay" value="{{ $denNgay ?? '' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="filterSanPham" class="form-label small mb-1">Tên sản phẩm</label>
+                            <select class="form-select form-select-sm" id="filterSanPham" name="san_pham_id" style="width: 100%;">
+                                <option value="">-- Tất cả sản phẩm --</option>
+                                @foreach($sanPhams as $sp)
+                                    <option value="{{ $sp->id }}" {{ ($sanPhamId ?? '') == $sp->id ? 'selected' : '' }}>{{ $sp->ten_san_pham }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-success btn-sm w-100">
+                                <i class="fas fa-search me-1"></i>Tìm kiếm
+                            </button>
+                        </div>
+                    </div>
+                    @if($isFiltering ?? false)
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <a href="{{ route('nhap-hang.index') }}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-times me-1"></i>Xóa bộ lọc
+                            </a>
+                            <span class="ms-2 text-muted small">
+                                <i class="fas fa-info-circle"></i> Đang hiển thị kết quả tìm kiếm
+                            </span>
+                        </div>
+                    </div>
+                    @endif
+                </form>
+            </div>
+        </div>
+
         <div class="table-responsive">
             <table class="table table-striped table-hover" id="nhapHangTable">
                 <thead>
                     <tr>
                         <th style="width: 60px;">STT</th>
                         <th>Tên sản phẩm</th>
-                        <th style="width: 100px;" class="text-center">Số lượng</th>
+                        <th style="width: 120px;" class="text-center">Số lượng</th>
                         <th style="width: 150px;" class="text-end">Giá nhập</th>
                         <th style="width: 150px;" class="text-end">Thành tiền</th>
                         <th style="width: 120px;" class="text-center">Thao tác</th>
@@ -45,7 +92,7 @@
                     </tr>
                     @empty
                     <tr id="emptyRow">
-                        <td colspan="6" class="text-center text-muted">Chưa có nhập hàng nào trong ngày</td>
+                        <td colspan="6" class="text-center text-muted">Chưa có nhập hàng nào{{ ($isFiltering ?? false) ? ' phù hợp với bộ lọc' : ' trong ngày' }}</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -153,6 +200,14 @@
 
 
     $(document).ready(function() {
+        // Initialize Select2 cho filter sản phẩm
+        $('#filterSanPham').select2({
+            theme: 'bootstrap-5',
+            placeholder: '-- Tất cả sản phẩm --',
+            allowClear: true,
+            width: '100%'
+        });
+
         // Initialize Select2 cho sản phẩm
         $('#tenSanPham').select2({
             dropdownParent: $('#nhapHangModal'),

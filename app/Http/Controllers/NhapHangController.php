@@ -11,13 +11,37 @@ use Carbon\Carbon;
 class NhapHangController extends Controller
 {
     /**
-     * Hiển thị danh sách nhập hàng trong ngày
+     * Hiển thị danh sách nhập hàng trong ngày hoặc theo filter
      */
     public function index(Request $request)
     {
         $ngay = $request->get('ngay', Carbon::today()->format('Y-m-d'));
+        $tuNgay = $request->get('tu_ngay');
+        $denNgay = $request->get('den_ngay');
+        $sanPhamId = $request->get('san_pham_id');
+        $isFiltering = $tuNgay || $denNgay || $sanPhamId;
 
-        $nhapHangs = NhapHang::with('donViBan')->whereDate('ngay_nhap', $ngay)
+        // Build query
+        $query = NhapHang::with('donViBan');
+
+        if ($isFiltering) {
+            // Filter theo khoảng thời gian
+            if ($tuNgay) {
+                $query->whereDate('ngay_nhap', '>=', $tuNgay);
+            }
+            if ($denNgay) {
+                $query->whereDate('ngay_nhap', '<=', $denNgay);
+            }
+            // Filter theo sản phẩm
+            if ($sanPhamId) {
+                $query->where('san_pham_id', $sanPhamId);
+            }
+        } else {
+            // Hiển thị theo ngày đơn lẻ
+            $query->whereDate('ngay_nhap', $ngay);
+        }
+
+        $nhapHangs = $query->orderBy('ngay_nhap', 'desc')
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -28,6 +52,9 @@ class NhapHangController extends Controller
         // Lấy danh sách đơn vị bán cho select
         $donViBans = DonViBan::all();
 
+        // Lấy danh sách sản phẩm cho filter dropdown
+        $sanPhams = SanPham::orderBy('ten_san_pham')->get();
+
         if ($request->ajax()) {
             return response()->json([
                 'nhapHangs' => $nhapHangs,
@@ -35,7 +62,7 @@ class NhapHangController extends Controller
             ]);
         }
 
-        return view('nhap-hang.index', compact('nhapHangs', 'ngay', 'tongTien', 'donViBans'));
+        return view('nhap-hang.index', compact('nhapHangs', 'ngay', 'tongTien', 'donViBans', 'sanPhams', 'tuNgay', 'denNgay', 'sanPhamId', 'isFiltering'));
     }
 
     /**

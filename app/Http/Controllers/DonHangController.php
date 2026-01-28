@@ -10,19 +10,46 @@ use Carbon\Carbon;
 class DonHangController extends Controller
 {
     /**
-     * Hiển thị danh sách đơn hàng trong ngày
+     * Hiển thị danh sách đơn hàng trong ngày hoặc theo filter
      */
     public function index(Request $request)
     {
         $ngay = $request->get('ngay', Carbon::today()->format('Y-m-d'));
+        $tuNgay = $request->get('tu_ngay');
+        $denNgay = $request->get('den_ngay');
+        $sanPhamId = $request->get('san_pham_id');
+        $isFiltering = $tuNgay || $denNgay || $sanPhamId;
 
-        $donHangs = DonHang::whereDate('ngay_ban', $ngay)
+        // Build query
+        $query = DonHang::with('donViBan');
+
+        if ($isFiltering) {
+            // Filter theo khoảng thời gian
+            if ($tuNgay) {
+                $query->whereDate('ngay_ban', '>=', $tuNgay);
+            }
+            if ($denNgay) {
+                $query->whereDate('ngay_ban', '<=', $denNgay);
+            }
+            // Filter theo sản phẩm
+            if ($sanPhamId) {
+                $query->where('san_pham_id', $sanPhamId);
+            }
+        } else {
+            // Hiển thị theo ngày đơn lẻ
+            $query->whereDate('ngay_ban', $ngay);
+        }
+
+        $donHangs = $query->orderBy('ngay_ban', 'desc')
             ->orderBy('created_at', 'desc')
             ->get();
 
         $tongTien = $donHangs->sum(function ($item) {
             return $item->so_luong * $item->gia;
         });
+
+        // Lấy danh sách sản phẩm cho filter dropdown
+        $sanPhams = SanPham::orderBy('ten_san_pham')->get();
 
         if ($request->ajax()) {
             return response()->json([
@@ -31,7 +58,7 @@ class DonHangController extends Controller
             ]);
         }
 
-        return view('don-hang.index', compact('donHangs', 'ngay', 'tongTien'));
+        return view('don-hang.index', compact('donHangs', 'ngay', 'tongTien', 'sanPhams', 'tuNgay', 'denNgay', 'sanPhamId', 'isFiltering'));
     }
 
     public function store(Request $request)
