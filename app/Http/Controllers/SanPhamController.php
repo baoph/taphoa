@@ -195,53 +195,16 @@ class SanPhamController extends Controller
 
     /**
      * API: Lấy danh sách đơn vị bán của sản phẩm
-     * 
-     * Response format:
-     * {
-     *   "success": true,
-     *   "data": {
-     *     "san_pham": {
-     *       "id": 1,
-     *       "ten_san_pham": "Bia Tiger",
-     *       "don_vi_co_ban": "lon",
-     *       "so_luong_ton_kho": 240
-     *     },
-     *     "don_vi_list": [
-     *       {
-     *         "id": 1,
-     *         "don_vi_ban_id": 1,
-     *         "ten_don_vi": "Thùng",
-     *         "ti_le_quy_doi": 24,
-     *         "gia_ban": 280000
-     *       }
-     *     ]
-     *   }
-     * }
      */
     public function getDonViOptions(int $id)
     {
-        try {
-            $sanPham = SanPham::findOrFail($id);
-            $donViList = $sanPham->getDonViOptions();
+        $sanPham = SanPham::findOrFail($id);
+        $options = $sanPham->getDonViOptions();
 
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'san_pham' => [
-                        'id' => $sanPham->id,
-                        'ten_san_pham' => $sanPham->ten_san_pham,
-                        'don_vi_co_ban' => $sanPham->don_vi_co_ban ?? $sanPham->dvt ?? 'cái',
-                        'so_luong_ton_kho' => (float) ($sanPham->so_luong_ton_kho ?? 0),
-                    ],
-                    'don_vi_list' => $donViList,
-                ],
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Không tìm thấy sản phẩm hoặc có lỗi xảy ra: ' . $e->getMessage(),
-            ], 404);
-        }
+        return response()->json([
+            'success' => true,
+            'data' => $options,
+        ]);
     }
 
     /**
