@@ -25,7 +25,7 @@ class SanPhamDonViSeeder extends Seeder
                 'gia_ban_le' => 7000,
                 'so_luong' => 0,
                 'don_vi_co_ban' => 'Lon',
-                'so_luong_ton_kho' => 500, // 500 lon trong kho
+                'so_luong' => 500, // 500 lon trong kho
                 'ghi_chu' => 'Bia Tiger 330ml',
             ]
         );

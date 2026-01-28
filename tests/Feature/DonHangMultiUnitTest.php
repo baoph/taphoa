@@ -19,7 +19,7 @@ class DonHangMultiUnitTest extends TestCase
         $sanPham = SanPham::factory()->create([
             'ten_san_pham' => 'Bia Tiger',
             'don_vi_co_ban' => 'Lon',
-            'so_luong_ton_kho' => 500,
+            'so_luong' => 500,
         ]);
 
         $donViBan = DonViBan::factory()->create(['ten_don_vi' => 'Thùng']);
@@ -55,7 +55,7 @@ class DonHangMultiUnitTest extends TestCase
 
         // Kiểm tra tồn kho đã bị trừ đúng
         $sanPham->refresh();
-        $this->assertEquals(452, $sanPham->so_luong_ton_kho); // 500 - 48 = 452
+        $this->assertEquals(452, $sanPham->so_luong); // 500 - 48 = 452
     }
 
     /** @test */
@@ -64,7 +64,7 @@ class DonHangMultiUnitTest extends TestCase
         $sanPham = SanPham::factory()->create([
             'ten_san_pham' => 'Bia Tiger',
             'don_vi_co_ban' => 'Lon',
-            'so_luong_ton_kho' => 20, // Chỉ còn 20 lon
+            'so_luong' => 20, // Chỉ còn 20 lon
         ]);
 
         $donViBan = DonViBan::factory()->create(['ten_don_vi' => 'Thùng']);
@@ -92,14 +92,14 @@ class DonHangMultiUnitTest extends TestCase
 
         // Tồn kho không thay đổi
         $sanPham->refresh();
-        $this->assertEquals(20, $sanPham->so_luong_ton_kho);
+        $this->assertEquals(20, $sanPham->so_luong);
     }
 
     /** @test */
     public function it_can_update_don_hang_and_adjust_stock_correctly()
     {
         $sanPham = SanPham::factory()->create([
-            'so_luong_ton_kho' => 500,
+            'so_luong' => 500,
         ]);
 
         $donViBan = DonViBan::factory()->create(['ten_don_vi' => 'Lốc']);
@@ -121,7 +121,7 @@ class DonHangMultiUnitTest extends TestCase
 
         // Trừ tồn kho ban đầu
         $sanPham->truTonKho(30);
-        $this->assertEquals(470, $sanPham->so_luong_ton_kho);
+        $this->assertEquals(470, $sanPham->so_luong);
 
         // Cập nhật đơn hàng: 10 lốc = 60 lon
         $data = [
@@ -139,14 +139,14 @@ class DonHangMultiUnitTest extends TestCase
 
         // Kiểm tra tồn kho: 470 + 30 (hoàn lại) - 60 (trừ mới) = 440
         $sanPham->refresh();
-        $this->assertEquals(440, $sanPham->so_luong_ton_kho);
+        $this->assertEquals(440, $sanPham->so_luong);
     }
 
     /** @test */
     public function it_restores_stock_when_deleting_don_hang()
     {
         $sanPham = SanPham::factory()->create([
-            'so_luong_ton_kho' => 500,
+            'so_luong' => 500,
         ]);
 
         $donViBan = DonViBan::factory()->create(['ten_don_vi' => 'Thùng']);
@@ -168,7 +168,7 @@ class DonHangMultiUnitTest extends TestCase
 
         // Trừ tồn kho
         $sanPham->truTonKho(72);
-        $this->assertEquals(428, $sanPham->so_luong_ton_kho);
+        $this->assertEquals(428, $sanPham->so_luong);
 
         // Xóa đơn hàng
         $response = $this->deleteJson(route('don-hang.destroy', $donHang));
@@ -177,14 +177,14 @@ class DonHangMultiUnitTest extends TestCase
 
         // Kiểm tra tồn kho được hoàn lại: 428 + 72 = 500
         $sanPham->refresh();
-        $this->assertEquals(500, $sanPham->so_luong_ton_kho);
+        $this->assertEquals(500, $sanPham->so_luong);
     }
 
     /** @test */
     public function it_calculates_conversion_correctly_for_different_units()
     {
         $sanPham = SanPham::factory()->create([
-            'so_luong_ton_kho' => 1000,
+            'so_luong' => 1000,
         ]);
 
         $donViThung = DonViBan::factory()->create(['ten_don_vi' => 'Thùng']);
@@ -223,7 +223,7 @@ class DonHangMultiUnitTest extends TestCase
         ]);
 
         $sanPham->refresh();
-        $this->assertEquals(976, $sanPham->so_luong_ton_kho); // 1000 - 24
+        $this->assertEquals(976, $sanPham->so_luong); // 1000 - 24
 
         // Bán 2 lốc
         $this->postJson(route('don-hang.store'), [
@@ -236,7 +236,7 @@ class DonHangMultiUnitTest extends TestCase
         ]);
 
         $sanPham->refresh();
-        $this->assertEquals(964, $sanPham->so_luong_ton_kho); // 976 - 12
+        $this->assertEquals(964, $sanPham->so_luong); // 976 - 12
 
         // Bán 5 lon
         $this->postJson(route('don-hang.store'), [
@@ -249,6 +249,6 @@ class DonHangMultiUnitTest extends TestCase
         ]);
 
         $sanPham->refresh();
-        $this->assertEquals(959, $sanPham->so_luong_ton_kho); // 964 - 5
+        $this->assertEquals(959, $sanPham->so_luong); // 964 - 5
     }
 }

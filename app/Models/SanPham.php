@@ -22,17 +22,16 @@ class SanPham extends Model
         'so_luong_don_vi',
         'ghi_chu',
         'don_vi_co_ban',
-        'so_luong_ton_kho',
+        'so_luong',
     ];
 
     protected $casts = [
-        'gia_nhap' => 'decimal:0',
-        'gia_ban' => 'decimal:0',
-        'gia_ban_le' => 'decimal:0',
+        'gia_nhap' => 'integer',
+        'gia_ban' => 'integer',
+        'gia_ban_le' => 'integer',
         'so_luong' => 'decimal:2',
-        'ti_so_chuyen_doi' => 'decimal:2',
-        'so_luong_don_vi' => 'decimal:2',
-        'so_luong_ton_kho' => 'decimal:2',
+        'ti_so_chuyen_doi' => 'integer',
+        'so_luong_don_vi' => 'integer',
     ];
 
     /**
@@ -76,7 +75,7 @@ class SanPham extends Model
      */
     public function getTonKhoTheoLon(): float
     {
-        return (float) $this->so_luong_ton_kho;
+        return (float) $this->so_luong;
     }
 
     /**
@@ -84,8 +83,8 @@ class SanPham extends Model
      */
     public function truTonKho(float $soLuong): bool
     {
-        if ($this->so_luong_ton_kho >= $soLuong) {
-            $this->so_luong_ton_kho -= $soLuong;
+        if ($this->so_luong >= $soLuong) {
+            $this->so_luong -= $soLuong;
             return $this->save();
         }
         return false;
@@ -96,7 +95,7 @@ class SanPham extends Model
      */
     public function congTonKho(float $soLuong): bool
     {
-        $this->so_luong_ton_kho += $soLuong;
+        $this->so_luong += $soLuong;
         return $this->save();
     }
 }

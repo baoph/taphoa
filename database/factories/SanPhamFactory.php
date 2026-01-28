@@ -21,7 +21,7 @@ class SanPhamFactory extends Factory
             'ti_so_chuyen_doi' => 1,
             'so_luong_don_vi' => 0,
             'don_vi_co_ban' => 'Cái',
-            'so_luong_ton_kho' => $this->faker->randomFloat(2, 100, 1000),
+            'so_luong' => $this->faker->randomFloat(2, 100, 1000),
             'ghi_chu' => $this->faker->optional()->sentence(),
         ];
     }

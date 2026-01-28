@@ -389,7 +389,7 @@ Thay thế toàn bộ nội dung bằng:
                             <th>Tồn kho:</th>
                             <td>
                                 <strong class="text-success fs-5">
-                                    {{ $sanPham->so_luong_ton_kho }} {{ $sanPham->don_vi_co_ban }}
+                                    {{ $sanPham->so_luong }} {{ $sanPham->don_vi_co_ban }}
                                 </strong>
                             </td>
                         </tr>
@@ -588,7 +588,7 @@ GET /api/san-pham/{id}/don-vi-options
       "id": 1,
       "ten_san_pham": "Bia Tiger",
       "don_vi_co_ban": "lon",
-      "so_luong_ton_kho": 240
+      "so_luong": 240
     },
     "don_vi_list": [
       {

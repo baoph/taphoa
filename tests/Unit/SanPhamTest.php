@@ -60,7 +60,7 @@ class SanPhamTest extends TestCase
     public function it_can_get_ton_kho_theo_lon()
     {
         $sanPham = SanPham::factory()->create([
-            'so_luong_ton_kho' => 500.50,
+            'so_luong' => 500.50,
         ]);
 
         $tonKho = $sanPham->getTonKhoTheoLon();
@@ -73,38 +73,38 @@ class SanPhamTest extends TestCase
     public function it_can_tru_ton_kho()
     {
         $sanPham = SanPham::factory()->create([
-            'so_luong_ton_kho' => 100,
+            'so_luong' => 100,
         ]);
 
         $result = $sanPham->truTonKho(30);
 
         $this->assertTrue($result);
-        $this->assertEquals(70, $sanPham->so_luong_ton_kho);
+        $this->assertEquals(70, $sanPham->so_luong);
     }
 
     /** @test */
     public function it_prevents_tru_ton_kho_when_insufficient()
     {
         $sanPham = SanPham::factory()->create([
-            'so_luong_ton_kho' => 20,
+            'so_luong' => 20,
         ]);
 
         $result = $sanPham->truTonKho(50);
 
         $this->assertFalse($result);
-        $this->assertEquals(20, $sanPham->so_luong_ton_kho);
+        $this->assertEquals(20, $sanPham->so_luong);
     }
 
     /** @test */
     public function it_can_cong_ton_kho()
     {
         $sanPham = SanPham::factory()->create([
-            'so_luong_ton_kho' => 100,
+            'so_luong' => 100,
         ]);
 
         $result = $sanPham->congTonKho(50);
 
         $this->assertTrue($result);
-        $this->assertEquals(150, $sanPham->so_luong_ton_kho);
+        $this->assertEquals(150, $sanPham->so_luong);
     }
 }

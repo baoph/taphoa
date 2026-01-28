@@ -1,6 +1,6 @@
 /**
  * Multi-Unit Handler - Xử lý logic đa đơn vị trong form bán hàng
- * 
+ *
  * Chức năng:
  * - Load danh sách đơn vị bán của sản phẩm
  * - Tính toán tự động số lượng tương đương (quy đổi về đơn vị cơ bản)
@@ -34,7 +34,7 @@ const MultiUnitHandler = {
         $('#tenSanPham').on('select2:select', function(e) {
             const data = e.params.data;
             console.log('Selected product:', data);
-            
+
             if (data.id && !data.newTag) {
                 // Sản phẩm có sẵn trong database
                 $('#sanPhamId').val(data.id);
@@ -43,7 +43,7 @@ const MultiUnitHandler = {
                 // Sản phẩm mới (tạo nhanh)
                 $('#sanPhamId').val('');
                 self.resetDonViDropdown();
-                
+
                 // Nếu có giá bán mặc định
                 if (data.gia_ban) {
                     $('#giaBan').val(data.gia_ban);
@@ -75,7 +75,7 @@ const MultiUnitHandler = {
      */
     loadDonViOptions: function(sanPhamId) {
         const self = this;
-        
+
         // Hiển thị loading
         $('#donViBanId').html('<option value="">Đang tải...</option>').prop('disabled', true);
         $('#tonKhoInfo').html('<span class="text-muted">Đang tải...</span>');
@@ -85,11 +85,11 @@ const MultiUnitHandler = {
             method: 'GET',
             success: function(response) {
                 console.log('Don vi options loaded:', response);
-                
+
                 if (response.success && response.data) {
                     const sanPham = response.data.san_pham;
                     const donViList = response.data.don_vi_list || [];
-                    
+
                     // Kiểm tra dữ liệu sản phẩm tồn tại trước khi truy cập thuộc tính
                     if (!sanPham) {
                         console.error('Dữ liệu sản phẩm không tồn tại trong response');
@@ -97,18 +97,18 @@ const MultiUnitHandler = {
                         self.resetDonViDropdown();
                         return;
                     }
-                    
+
                     self.currentSanPham = sanPham;
                     self.currentDonViList = donViList;
-                    self.currentTonKho = sanPham.so_luong_ton_kho || 0;
+                    self.currentTonKho = sanPham.so_luong || 0;
                     self.currentDonViCoBan = sanPham.don_vi_co_ban || '';
-                    
+
                     // Populate dropdown
                     self.populateDonViDropdown(donViList);
-                    
+
                     // Hiển thị thông tin tồn kho
                     self.updateTonKhoDisplay();
-                    
+
                     // Tự động chọn đơn vị đầu tiên nếu có
                     if (donViList.length > 0) {
                         $('#donViBanId').val(donViList[0].id).trigger('change');
@@ -120,7 +120,7 @@ const MultiUnitHandler = {
             },
             error: function(xhr) {
                 console.error('Error loading don vi options:', xhr);
-                
+
                 let errorMessage = 'Có lỗi khi tải đơn vị bán';
                 if (xhr.responseJSON && xhr.responseJSON.message) {
                     errorMessage = xhr.responseJSON.message;
@@ -129,7 +129,7 @@ const MultiUnitHandler = {
                 } else if (xhr.status === 500) {
                     errorMessage = 'Lỗi server, vui lòng thử lại';
                 }
-                
+
                 toastr.error(errorMessage);
                 self.resetDonViDropdown();
             }
@@ -156,8 +156,8 @@ const MultiUnitHandler = {
         // Thêm các option đơn vị
         donViList.forEach(function(donVi) {
             const label = `${donVi.ten_don_vi} (${donVi.ti_le_quy_doi} ${donVi.don_vi_co_ban || MultiUnitHandler.currentDonViCoBan}) - ${MultiUnitHandler.formatCurrency(donVi.gia_ban)}`;
-            $select.append(`<option value="${donVi.id}" 
-                                    data-ti-le="${donVi.ti_le_quy_doi}" 
+            $select.append(`<option value="${donVi.id}"
+                                    data-ti-le="${donVi.ti_le_quy_doi}"
                                     data-gia="${donVi.gia_ban}"
                                     data-ten="${donVi.ten_don_vi}">${label}</option>`);
         });
@@ -204,7 +204,7 @@ const MultiUnitHandler = {
         const tiLe = parseFloat($selected.data('ti-le')) || 1;
 
         const tuongDuong = soLuong * tiLe;
-        
+
         $('#tuongDuong').text(this.formatNumber(tuongDuong));
         $('#donViCoBan').text(this.currentDonViCoBan);
 
@@ -252,7 +252,7 @@ const MultiUnitHandler = {
     updateTonKhoDisplay: function() {
         const html = `
             <div class="alert alert-info py-2 mb-0">
-                <i class="fas fa-box"></i> 
+                <i class="fas fa-box"></i>
                 <strong>Tồn kho:</strong> ${this.formatNumber(this.currentTonKho)} ${this.currentDonViCoBan}
             </div>
         `;

@@ -55,7 +55,7 @@
                             <th>Tồn kho:</th>
                             <td>
                                 <strong class="text-success fs-5">
-                                    {{ $sanPham->so_luong_ton_kho }} {{ $sanPham->don_vi_co_ban }}
+                                    {{ $sanPham->so_luong }} {{ $sanPham->don_vi_co_ban }}
                                 </strong>
                             </td>
                         </tr>
@@ -97,13 +97,13 @@
                                         <td>{{ $spDonVi->ti_le_quy_doi }} {{ $sanPham->don_vi_co_ban }}</td>
                                         <td class="text-end">{{ number_format($spDonVi->gia_ban) }} đ</td>
                                         <td class="text-center">
-                                            <button type="button" class="btn btn-sm btn-warning" 
-                                                    onclick="SanPhamDonViManager.showEditDonViModal({{ $spDonVi->id }})" 
+                                            <button type="button" class="btn btn-sm btn-warning"
+                                                    onclick="SanPhamDonViManager.showEditDonViModal({{ $spDonVi->id }})"
                                                     title="Sửa">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
-                                            <button type="button" class="btn btn-sm btn-danger" 
-                                                    onclick="SanPhamDonViManager.deleteDonVi({{ $spDonVi->id }})" 
+                                            <button type="button" class="btn btn-sm btn-danger"
+                                                    onclick="SanPhamDonViManager.deleteDonVi({{ $spDonVi->id }})"
                                                     title="Xóa">
                                                 <i class="bi bi-trash"></i>
                                             </button>
@@ -117,10 +117,10 @@
                             </tbody>
                         </table>
                     </div>
-                    
+
                     <div class="alert alert-info mt-3">
-                        <i class="bi bi-info-circle"></i> 
-                        <strong>Lưu ý:</strong> Đơn vị bán giúp bạn bán sản phẩm theo nhiều cách khác nhau 
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Lưu ý:</strong> Đơn vị bán giúp bạn bán sản phẩm theo nhiều cách khác nhau
                         (thùng, lốc, lon...). Tỉ lệ quy đổi sẽ tự động tính số lượng tồn kho.
                     </div>
                 </div>
@@ -158,7 +158,7 @@
                             Tỉ lệ quy đổi <span class="text-danger">*</span>
                         </label>
                         <div class="input-group">
-                            <input type="number" class="form-control" id="tiLeQuyDoi" 
+                            <input type="number" class="form-control" id="tiLeQuyDoi"
                                    min="0.01" step="0.01" placeholder="Ví dụ: 24" required>
                             <span class="input-group-text">{{ $sanPham->don_vi_co_ban }}</span>
                         </div>
@@ -173,7 +173,7 @@
                             Giá bán <span class="text-danger">*</span>
                         </label>
                         <div class="input-group">
-                            <input type="number" class="form-control" id="giaBanDonVi" 
+                            <input type="number" class="form-control" id="giaBanDonVi"
                                    min="0" step="1000" placeholder="Ví dụ: 280000" required>
                             <span class="input-group-text">đ</span>
                         </div>

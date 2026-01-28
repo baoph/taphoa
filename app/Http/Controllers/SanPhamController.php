@@ -16,17 +16,17 @@ class SanPhamController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search', '');
-        
+
         $sanPhams = SanPham::when($search, function ($query, $search) {
                 return $query->where('ten_san_pham', 'like', '%' . $search . '%');
             })
             ->orderBy('ten_san_pham')
             ->paginate(15);
-        
+
         if ($request->ajax()) {
             return view('san-pham.partials.table', compact('sanPhams'))->render();
         }
-        
+
         return view('san-pham.index', compact('sanPhams', 'search'));
     }
 
@@ -36,13 +36,13 @@ class SanPhamController extends Controller
     public function searchAjax(Request $request)
     {
         $search = $request->get('search', '');
-        
+
         $sanPhams = SanPham::when($search, function ($query, $search) {
                 return $query->where('ten_san_pham', 'like', '%' . $search . '%');
             })
             ->orderBy('ten_san_pham')
             ->paginate(15);
-        
+
         return response()->json([
             'success' => true,
             'html' => view('san-pham.partials.table', compact('sanPhams'))->render(),
@@ -76,7 +76,7 @@ class SanPhamController extends Controller
         ]);
 
         $data = $request->all();
-        
+
         // Tính toán số lượng đơn vị tự động
         $soLuong = $request->input('so_luong', 0);
         $tiSoChuyenDoi = $request->input('ti_so_chuyen_doi', 1);
@@ -114,7 +114,7 @@ class SanPhamController extends Controller
         ]);
 
         $data = $request->all();
-        
+
         // Tính toán số lượng đơn vị tự động
         $soLuong = $request->input('so_luong', 0);
         $tiSoChuyenDoi = $request->input('ti_so_chuyen_doi', 1);
@@ -166,7 +166,7 @@ class SanPhamController extends Controller
     public function search(Request $request)
     {
         $search = $request->get('q', '');
-        
+
         $sanPhams = SanPham::where('ten_san_pham', 'like', '%' . $search . '%')
             ->orderBy('ten_san_pham')
             ->limit(20)
@@ -195,7 +195,7 @@ class SanPhamController extends Controller
 
     /**
      * API: Lấy danh sách đơn vị bán của sản phẩm
-     * 
+     *
      * Response format:
      * {
      *   "success": true,
@@ -204,7 +204,7 @@ class SanPhamController extends Controller
      *       "id": 1,
      *       "ten_san_pham": "Bia Tiger",
      *       "don_vi_co_ban": "lon",
-     *       "so_luong_ton_kho": 240
+     *       "so_luong": 240
      *     },
      *     "don_vi_list": [
      *       {
@@ -231,7 +231,7 @@ class SanPhamController extends Controller
                         'id' => $sanPham->id,
                         'ten_san_pham' => $sanPham->ten_san_pham,
                         'don_vi_co_ban' => $sanPham->don_vi_co_ban ?? $sanPham->dvt ?? 'cái',
-                        'so_luong_ton_kho' => (float) ($sanPham->so_luong_ton_kho ?? 0),
+                        'so_luong' => (float) ($sanPham->so_luong ?? 0),
                     ],
                     'don_vi_list' => $donViList,
                 ],
@@ -267,28 +267,28 @@ class SanPhamController extends Controller
 
         try {
             $file = $request->file('file');
-            
+
             // Import dữ liệu
             $import = new SanPhamImport();
             Excel::import($import, $file);
-            
+
             // Kiểm tra lỗi
             $errors = $import->errors();
-            
+
             if (count($errors) > 0) {
                 $errorMessages = [];
                 foreach ($errors as $error) {
                     $errorMessages[] = "Dòng {$error->row()}: {$error->errors()[0]}";
                 }
-                
+
                 return redirect()->back()
                     ->with('warning', 'Import hoàn tất nhưng có một số lỗi:')
                     ->with('errors', $errorMessages);
             }
-            
+
             return redirect()->route('san-pham.index')
                 ->with('success', 'Import dữ liệu thành công!');
-                
+
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', 'Có lỗi xảy ra khi import: ' . $e->getMessage());

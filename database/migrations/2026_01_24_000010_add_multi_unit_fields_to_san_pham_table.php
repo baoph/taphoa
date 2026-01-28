@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('san_pham', function (Blueprint $table) {
             $table->string('don_vi_co_ban', 50)->default('Cái')->after('gia_ban_le');
-            $table->decimal('so_luong_ton_kho', 10, 2)->default(0)->after('don_vi_co_ban');
+            $table->decimal('so_luong', 10, 2)->default(0)->after('don_vi_co_ban');
         });
     }
 
@@ -23,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('san_pham', function (Blueprint $table) {
-            $table->dropColumn(['don_vi_co_ban', 'so_luong_ton_kho']);
+            $table->dropColumn(['don_vi_co_ban', 'so_luong']);
         });
     }
 };
