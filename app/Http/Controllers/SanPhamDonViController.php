@@ -120,7 +120,15 @@ class SanPhamDonViController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $options,
+            'data' => [
+                'san_pham' => [
+                    'id' => $sanPham->id,
+                    'ten_san_pham' => $sanPham->ten_san_pham,
+                    'so_luong' => $sanPham->so_luong,
+                    'don_vi_co_ban' => $sanPham->don_vi_co_ban,
+                ],
+                'don_vi_list' => $options,
+            ],
         ]);
     }
 }
