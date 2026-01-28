@@ -120,7 +120,17 @@ const MultiUnitHandler = {
             },
             error: function(xhr) {
                 console.error('Error loading don vi options:', xhr);
-                toastr.error('Có lỗi khi tải đơn vị bán');
+                
+                let errorMessage = 'Có lỗi khi tải đơn vị bán';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                } else if (xhr.status === 404) {
+                    errorMessage = 'Không tìm thấy sản phẩm';
+                } else if (xhr.status === 500) {
+                    errorMessage = 'Lỗi server, vui lòng thử lại';
+                }
+                
+                toastr.error(errorMessage);
                 self.resetDonViDropdown();
             }
         });
@@ -134,7 +144,7 @@ const MultiUnitHandler = {
         const $select = $('#donViBanId');
         $select.empty().prop('disabled', false);
 
-        if (donViList.length === 0) {
+        if (!donViList || donViList.length === 0) {
             $select.html('<option value="">Chưa có đơn vị bán</option>');
             toastr.warning('Sản phẩm này chưa có đơn vị bán. Vui lòng thêm đơn vị bán trước.');
             return;
@@ -145,7 +155,7 @@ const MultiUnitHandler = {
 
         // Thêm các option đơn vị
         donViList.forEach(function(donVi) {
-            const label = `${donVi.ten_don_vi} (${donVi.ti_le_quy_doi} ${donVi.don_vi_co_ban}) - ${MultiUnitHandler.formatCurrency(donVi.gia_ban)}`;
+            const label = `${donVi.ten_don_vi} (${donVi.ti_le_quy_doi} ${donVi.don_vi_co_ban || MultiUnitHandler.currentDonViCoBan}) - ${MultiUnitHandler.formatCurrency(donVi.gia_ban)}`;
             $select.append(`<option value="${donVi.id}" 
                                     data-ti-le="${donVi.ti_le_quy_doi}" 
                                     data-gia="${donVi.gia_ban}"
@@ -161,6 +171,7 @@ const MultiUnitHandler = {
         $('#tonKhoInfo').html('');
         $('#tuongDuong').text('0');
         $('#donViCoBan').text('');
+        this.currentSanPham = null;
         this.currentDonViList = [];
         this.currentTonKho = 0;
         this.currentDonViCoBan = '';
