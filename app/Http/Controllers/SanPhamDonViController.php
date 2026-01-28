@@ -60,6 +60,18 @@ class SanPhamDonViController extends Controller
     }
 
     /**
+     * Lấy chi tiết đơn vị sản phẩm
+     */
+    public function show(SanPhamDonVi $sanPhamDonVi): JsonResponse
+    {
+        $sanPhamDonVi->load('donViBan');
+        return response()->json([
+            'success' => true,
+            'data' => $sanPhamDonVi,
+        ]);
+    }
+
+    /**
      * Cập nhật đơn vị sản phẩm
      */
     public function update(Request $request, SanPhamDonVi $sanPhamDonVi): JsonResponse

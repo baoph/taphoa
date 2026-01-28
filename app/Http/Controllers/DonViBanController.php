@@ -5,10 +5,23 @@ namespace App\Http\Controllers;
 use App\Models\DonViBan;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
 
 class DonViBanController extends Controller
 {
+    /**
+     * API: Lấy danh sách đơn vị bán (JSON)
+     */
+    public function apiIndex(): JsonResponse
+    {
+        $donViBans = DonViBan::orderBy('ten_don_vi')->get();
+        return response()->json([
+            'success' => true,
+            'data' => $donViBans,
+        ]);
+    }
+
     /**
      * Hiển thị danh sách đơn vị bán
      */
