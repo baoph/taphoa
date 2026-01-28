@@ -367,7 +367,7 @@ Thay thế toàn bộ nội dung bằng:
                         </tr>
                         <tr>
                             <th>Đơn vị tính:</th>
-                            <td>{{ $sanPham->dvt }}</td>
+                            <td>{{ $sanPham->dv_nhap_hang }}</td>
                         </tr>
                         <tr>
                             <th>Đơn vị cơ bản:</th>

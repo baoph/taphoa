@@ -23,10 +23,10 @@
                     <span class="input-group-text">
                         <i class="bi bi-search"></i>
                     </span>
-                    <input type="text" 
-                           class="form-control" 
-                           id="searchInput" 
-                           placeholder="Tìm kiếm tên sản phẩm..." 
+                    <input type="text"
+                           class="form-control"
+                           id="searchInput"
+                           placeholder="Tìm kiếm tên sản phẩm..."
                            value="{{ $search ?? '' }}">
                 </div>
             </div>
@@ -38,7 +38,7 @@
                     <tr>
                         <th style="width: 60px;">STT</th>
                         <th>Tên sản phẩm</th>
-                        <th style="width: 80px;">DVT</th>
+                        <th style="width: 80px;">dv_nhap_hang</th>
                         <th style="width: 100px;" class="text-end">Giá nhập</th>
                         <th style="width: 100px;" class="text-end">Giá bán</th>
                         <th style="width: 100px;" class="text-end">Giá bán lẻ</th>
@@ -55,7 +55,7 @@
                 </tbody>
             </table>
         </div>
-        
+
         <div class="d-flex justify-content-center" id="paginationContainer">
             @include('san-pham.partials.pagination')
         </div>
@@ -67,17 +67,17 @@
 <script>
 $(document).ready(function() {
     let searchTimeout;
-    
+
     // AJAX Search
     $('#searchInput').on('keyup', function() {
         clearTimeout(searchTimeout);
         const searchValue = $(this).val();
-        
+
         searchTimeout = setTimeout(function() {
             performSearch(searchValue);
         }, 300); // Debounce 300ms
     });
-    
+
     function performSearch(search) {
         $.ajax({
             url: '{{ route("san-pham.search.ajax") }}',
@@ -94,13 +94,13 @@ $(document).ready(function() {
             }
         });
     }
-    
+
     // Handle pagination clicks
     $(document).on('click', '.pagination a', function(e) {
         e.preventDefault();
         const url = $(this).attr('href');
         const search = $('#searchInput').val();
-        
+
         $.ajax({
             url: url,
             type: 'GET',
@@ -109,7 +109,7 @@ $(document).ready(function() {
                 if (response.success) {
                     $('#sanPhamTableBody').html(response.html);
                     $('#paginationContainer').html(response.pagination);
-                    
+
                     // Scroll to top of table
                     $('html, body').animate({
                         scrollTop: $('.card').offset().top - 20

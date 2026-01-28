@@ -19,7 +19,7 @@ class SanPhamDonViSeeder extends Seeder
         $sanPham = SanPham::firstOrCreate(
             ['ten_san_pham' => 'Bia Tiger'],
             [
-                'dvt' => 'Lon',
+                'dv_nhap_hang' => 'Lon',
                 'gia_nhap' => 6000,
                 'gia_ban' => 7000,
                 'gia_ban_le' => 7000,

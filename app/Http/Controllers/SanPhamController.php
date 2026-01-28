@@ -66,7 +66,7 @@ class SanPhamController extends Controller
     {
         $request->validate([
             'ten_san_pham' => 'required|string|max:255',
-            'dvt' => 'nullable|string|max:50',
+            'dv_nhap_hang' => 'nullable|string|max:50',
             'gia_nhap' => 'nullable|numeric|min:0',
             'gia_ban' => 'nullable|numeric|min:0',
             'gia_ban_le' => 'nullable|numeric|min:0',
@@ -104,7 +104,7 @@ class SanPhamController extends Controller
     {
         $request->validate([
             'ten_san_pham' => 'required|string|max:255',
-            'dvt' => 'nullable|string|max:50',
+            'dv_nhap_hang' => 'nullable|string|max:50',
             'gia_nhap' => 'nullable|numeric|min:0',
             'gia_ban' => 'nullable|numeric|min:0',
             'gia_ban_le' => 'nullable|numeric|min:0',
@@ -144,7 +144,7 @@ class SanPhamController extends Controller
     {
         $search = $request->get('q', '');
         $sanPhams = SanPham::where('ten_san_pham', 'like', "%{$search}%")
-            ->select('id', 'ten_san_pham', 'gia_ban', 'dvt')
+            ->select('id', 'ten_san_pham', 'gia_ban', 'dv_nhap_hang')
             ->limit(20)
             ->get();
 
@@ -154,7 +154,7 @@ class SanPhamController extends Controller
                     'id' => $sp->id,
                     'text' => $sp->ten_san_pham,
                     'gia_ban' => $sp->gia_ban,
-                    'dvt' => $sp->dvt,
+                    'dv_nhap_hang' => $sp->dv_nhap_hang,
                 ];
             })
         ]);
@@ -170,7 +170,7 @@ class SanPhamController extends Controller
         $sanPhams = SanPham::where('ten_san_pham', 'like', '%' . $search . '%')
             ->orderBy('ten_san_pham')
             ->limit(20)
-            ->get(['id', 'ten_san_pham', 'gia_ban', 'dvt']);
+            ->get(['id', 'ten_san_pham', 'gia_ban', 'dv_nhap_hang']);
 
         return response()->json([
             'results' => $sanPhams->map(function ($sp) {
@@ -178,7 +178,7 @@ class SanPhamController extends Controller
                     'id' => $sp->id,
                     'text' => $sp->ten_san_pham,
                     'gia_ban' => $sp->gia_ban,
-                    'dvt' => $sp->dvt,
+                    'dv_nhap_hang' => $sp->dv_nhap_hang,
                 ];
             })
         ]);
@@ -230,7 +230,7 @@ class SanPhamController extends Controller
                     'san_pham' => [
                         'id' => $sanPham->id,
                         'ten_san_pham' => $sanPham->ten_san_pham,
-                        'don_vi_co_ban' => $sanPham->don_vi_co_ban ?? $sanPham->dvt ?? 'cái',
+                        'don_vi_co_ban' => $sanPham->don_vi_co_ban ?? $sanPham->dv_nhap_hang ?? 'cái',
                         'so_luong' => (float) ($sanPham->so_luong ?? 0),
                     ],
                     'don_vi_list' => $donViList,

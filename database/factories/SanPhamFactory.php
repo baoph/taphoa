@@ -13,7 +13,7 @@ class SanPhamFactory extends Factory
     {
         return [
             'ten_san_pham' => $this->faker->words(3, true),
-            'dvt' => $this->faker->randomElement(['Lon', 'Chai', 'Gói', 'Cái']),
+            'dv_nhap_hang' => $this->faker->randomElement(['Lon', 'Chai', 'Gói', 'Cái']),
             'gia_nhap' => $this->faker->numberBetween(5000, 50000),
             'gia_ban' => $this->faker->numberBetween(6000, 60000),
             'gia_ban_le' => $this->faker->numberBetween(7000, 70000),

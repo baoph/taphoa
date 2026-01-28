@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('san_pham', function (Blueprint $table) {
             $table->id();
             $table->string('ten_san_pham');
-            $table->string('dvt')->nullable()->comment('Đơn vị tính');
+            $table->string('dv_nhap_hang')->nullable()->comment('Đơn vị tính');
             $table->decimal('gia_nhap', 12, 0)->default(0);
             $table->decimal('gia_ban', 12, 0)->default(0);
             $table->timestamps();

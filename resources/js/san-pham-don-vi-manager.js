@@ -1,6 +1,6 @@
 /**
  * San Pham Don Vi Manager - Quản lý đơn vị bán của sản phẩm
- * 
+ *
  * Chức năng:
  * - Thêm đơn vị bán mới cho sản phẩm
  * - Sửa thông tin đơn vị bán
@@ -111,15 +111,15 @@ const SanPhamDonViManager = {
             success: function(response) {
                 if (response.success) {
                     const data = response.data;
-                    
+
                     // Fill form
                     $('#donViBanIdSelect').val(data.don_vi_ban_id);
                     $('#tiLeQuyDoi').val(data.ti_le_quy_doi);
                     $('#giaBanDonVi').val(data.gia_ban);
-                    
+
                     // Đổi title
                     $('#donViModalTitle').html('<i class="bi bi-pencil"></i> Sửa đơn vị bán');
-                    
+
                     // Hiển thị modal
                     $('#donViModal').modal('show');
                 } else {
@@ -183,7 +183,7 @@ const SanPhamDonViManager = {
             },
             error: function(xhr) {
                 console.error('Error saving don vi:', xhr);
-                
+
                 const errors = xhr.responseJSON?.errors;
                 if (errors) {
                     let errorMsg = '';
@@ -270,7 +270,7 @@ const SanPhamDonViManager = {
             const row = `
                 <tr>
                     <td>${index + 1}</td>
-                    <td><strong>${item.ten_don_vi}</strong></td>
+                    <td><strong>${item.don_vi_ban.ten_don_vi}</strong></td>
                     <td>${self.formatNumber(item.ti_le_quy_doi)} ${item.don_vi_co_ban}</td>
                     <td class="text-end">${self.formatCurrency(item.gia_ban)}</td>
                     <td class="text-center">
@@ -327,7 +327,7 @@ const SanPhamDonViManager = {
         if (tiLe > 0 && giaBanLe > 0) {
             const giaSuggestion = tiLe * giaBanLe;
             $('#giaBanSuggestion').text('Gợi ý: ' + this.formatCurrency(giaSuggestion));
-            
+
             // Tự động điền nếu giá bán đang trống
             if (!$('#giaBanDonVi').val()) {
                 $('#giaBanDonVi').val(giaSuggestion);

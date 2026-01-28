@@ -32,8 +32,8 @@
                             <td>{{ $sanPham->ten_san_pham }}</td>
                         </tr>
                         <tr>
-                            <th>Đơn vị tính:</th>
-                            <td>{{ $sanPham->dvt }}</td>
+                            <th>Đơn vị nhập hàng:</th>
+                            <td>{{ $sanPham->dv_nhap_hang }}</td>
                         </tr>
                         <tr>
                             <th>Đơn vị cơ bản:</th>
@@ -51,12 +51,38 @@
                             <th>Giá bán lẻ:</th>
                             <td>{{ number_format($sanPham->gia_ban_le) }} đ</td>
                         </tr>
+                        @php
+                            $soLuong = $sanPham->so_luong ?? 0;
+                            $tiSo = $sanPham->ti_so_chuyen_doi ?? 1;
+
+                            $soDonViNhap = intdiv($soLuong, $tiSo);
+                            $soDu = $soLuong % $tiSo;
+                        @endphp
+
                         <tr>
                             <th>Tồn kho:</th>
                             <td>
                                 <strong class="text-success fs-5">
-                                    {{ $sanPham->so_luong }} {{ $sanPham->don_vi_co_ban }}
+                                    @if($soDonViNhap > 0)
+                                        {{ $soDonViNhap }} {{ $sanPham->dv_nhap_hang }}
+                                    @endif
+
+                                    @if($soDonViNhap > 0 && $soDu > 0)
+                                        &nbsp;
+                                    @endif
+
+                                    @if($soDu > 0)
+                                        {{ $soDu }} {{ $sanPham->don_vi_co_ban }}
+                                    @endif
+
+                                    @if($soDonViNhap == 0 && $soDu == 0)
+                                        0 {{ $sanPham->don_vi_co_ban }}
+                                    @endif
                                 </strong>
+
+                                <div class="text-muted small">
+                                    ({{ $soLuong }} {{ $sanPham->don_vi_co_ban }})
+                                </div>
                             </td>
                         </tr>
                         <tr>

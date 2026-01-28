@@ -18,10 +18,10 @@ class SanPhamDonViController extends Controller
     {
         $sanPham = SanPham::findOrFail($sanPhamId);
         $donViList = $sanPham->sanPhamDonVi()->with('donViBan')->get();
-
         return response()->json([
             'success' => true,
             'data' => $donViList,
+            'don_vi_co_ban' => $sanPham->don_vi_co_ban,
         ]);
     }
 

@@ -67,7 +67,7 @@ File Excel cần có các cột sau (dòng đầu tiên là tiêu đề):
 Hệ thống hỗ trợ nhiều tên cột khác nhau:
 
 - **Tên sản phẩm**: `Hàng`, `ten_san_pham`
-- **Đơn vị**: `Đơn vị`, `don_vi`, `dvt`, `Đơn vị tính`, `don_vi_tinh`
+- **Đơn vị**: `Đơn vị`, `don_vi`, `dv_nhap_hang`, `Đơn vị tính`, `don_vi_tinh`
 - **Giá nhập**: `Giá Nhập Vào`, `gia_nhap`
 - **Giá bán**: `Giá Bán Ra`, `gia_ban`
 - **Giá bán lẻ**: `Giá Bán Lẻ`, `gia_ban_le`

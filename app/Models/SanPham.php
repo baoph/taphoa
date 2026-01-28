@@ -13,7 +13,7 @@ class SanPham extends Model
 
     protected $fillable = [
         'ten_san_pham',
-        'dvt',
+        'dv_nhap_hang',
         'gia_nhap',
         'gia_ban',
         'gia_ban_le',
@@ -29,7 +29,7 @@ class SanPham extends Model
         'gia_nhap' => 'integer',
         'gia_ban' => 'integer',
         'gia_ban_le' => 'integer',
-        'so_luong' => 'decimal:2',
+        'so_luong' => 'integer',
         'ti_so_chuyen_doi' => 'integer',
         'so_luong_don_vi' => 'integer',
     ];

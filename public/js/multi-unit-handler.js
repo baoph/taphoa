@@ -98,7 +98,6 @@ const MultiUnitHandler = {
                         return;
                     }
 
-                    self.currentSanPham = sanPham;
                     self.currentDonViList = donViList;
                     self.currentTonKho = sanPham.so_luong || 0;
                     self.currentDonViCoBan = sanPham.don_vi_co_ban || '';

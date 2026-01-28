@@ -119,7 +119,7 @@
                     <div class="card-body">
                         <form action="{{ route('san-pham.import') }}" method="POST" enctype="multipart/form-data" id="importForm">
                             @csrf
-                            
+
                             <div class="upload-area" id="uploadArea">
                                 <i class="bi bi-cloud-upload upload-icon"></i>
                                 <h5>Kéo thả file vào đây hoặc click để chọn</h5>
@@ -219,14 +219,14 @@
 
                         <div class="alert alert-info mt-3">
                             <i class="bi bi-download"></i>
-                            <strong>Mẹo:</strong> Bạn có thể xuất danh sách sản phẩm hiện tại ra Excel để làm mẫu, 
+                            <strong>Mẹo:</strong> Bạn có thể xuất danh sách sản phẩm hiện tại ra Excel để làm mẫu,
                             sau đó chỉnh sửa và import lại.
                         </div>
 
                         <h6 class="mt-4"><i class="bi bi-gear"></i> Các cột được hỗ trợ:</h6>
                         <ul>
                             <li><strong>Hàng</strong> hoặc <strong>ten_san_pham</strong>: Tên sản phẩm (bắt buộc)</li>
-                            <li><strong>Đơn vị</strong> hoặc <strong>don_vi</strong> hoặc <strong>dvt</strong>: Đơn vị tính</li>
+                            <li><strong>Đơn vị</strong> hoặc <strong>don_vi</strong> hoặc <strong>dv_nhap_hang</strong>: Đơn vị tính</li>
                             <li><strong>Giá Nhập Vào</strong> hoặc <strong>gia_nhap</strong>: Giá nhập</li>
                             <li><strong>Giá Bán Ra</strong> hoặc <strong>gia_ban</strong>: Giá bán sỉ</li>
                             <li><strong>Giá Bán Lẻ</strong> hoặc <strong>gia_ban_le</strong>: Giá bán lẻ</li>
@@ -277,7 +277,7 @@
             e.preventDefault();
             this.style.borderColor = '#667eea';
             this.style.backgroundColor = '#f8f9ff';
-            
+
             const files = e.dataTransfer.files;
             if (files.length > 0) {
                 fileInput.files = files;

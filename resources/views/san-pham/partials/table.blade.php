@@ -2,7 +2,7 @@
 <tr>
     <td>{{ $sanPhams->firstItem() + $index }}</td>
     <td>{{ $sp->ten_san_pham }}</td>
-    <td>{{ $sp->dvt }}</td>
+    <td>{{ $sp->dv_nhap_hang }}</td>
     <td class="text-end">{{ number_format($sp->gia_nhap, 0, ',', '.') }}đ</td>
     <td class="text-end">{{ number_format($sp->gia_ban, 0, ',', '.') }}đ</td>
     <td class="text-end">{{ number_format($sp->gia_ban_le, 0, ',', '.') }}đ</td>

@@ -20,8 +20,8 @@ class SanPhamDonVi extends Model
     ];
 
     protected $casts = [
-        'ti_le_quy_doi' => 'decimal:2',
-        'gia_ban' => 'decimal:2',
+        'ti_le_quy_doi' => 'integer',
+        'gia_ban' => 'integer',
     ];
 
     /**

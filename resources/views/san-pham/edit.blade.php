@@ -22,18 +22,32 @@
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
-
                     <div class="mb-3">
-                        <label for="dvt" class="form-label">Đơn vị tính</label>
-                        <select class="form-select @error('dvt') is-invalid @enderror" id="dvt" name="dvt">
+                        <label for="dv_nhap_hang" class="form-label">Đơn vị nhập hàng</label>
+                        <select class="form-select @error('dv_nhap_hang') is-invalid @enderror" id="dv_nhap_hang" name="dv_nhap_hang">
                             <option value="">-- Chọn đơn vị tính --</option>
                             @foreach($donViTinhs as $donVi)
-                                <option value="{{ $donVi->ten_don_vi }}" {{ old('dvt', $sanPham->dvt) == $donVi->ten_don_vi ? 'selected' : '' }}>
+                                <option value="{{ $donVi->ten_don_vi }}" {{ old('dv_nhap_hang', $sanPham->dv_nhap_hang) == $donVi->ten_don_vi ? 'selected' : '' }}>
                                     {{ $donVi->ten_don_vi }}
                                 </option>
                             @endforeach
                         </select>
-                        @error('dvt')
+                        @error('dv_nhap_hang')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="don_vi_co_ban" class="form-label">Đơn vị cơ bản</label>
+                        <select class="form-select @error('don_vi_co_ban') is-invalid @enderror" id="don_vi_co_ban" name="don_vi_co_ban">
+                            <option value="">-- Chọn đơn vị cơ bản --</option>
+                            @foreach($donViTinhs as $donVi)
+                                <option value="{{ $donVi->ten_don_vi }}" {{ old('don_vi_co_ban', $sanPham->don_vi_co_ban) == $donVi->ten_don_vi ? 'selected' : '' }}>
+                                    {{ $donVi->ten_don_vi }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('don_vi_co_ban')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
@@ -88,7 +102,7 @@
 
                         <div class="col-md-3 mb-3">
                             <label for="so_luong_don_vi" class="form-label">Số lượng đơn vị</label>
-                            <input type="number" class="form-control" id="so_luong_don_vi"
+                            <input type="text" class="form-control" id="so_luong_don_vi"
                                    name="so_luong_don_vi" value="{{ old('so_luong_don_vi', $sanPham->so_luong_don_vi ?? 0) }}" readonly>
                             <small class="text-muted">Tự động tính</small>
                         </div>
@@ -122,14 +136,41 @@
 <script>
     // Tự động tính số lượng đơn vị khi thay đổi số lượng hoặc tỉ số chuyển đổi
     function calculateSoLuongDonVi() {
-        const soLuong = parseInt(document.getElementById('so_luong').value) || 0;
-        const tiSoChuyenDoi = parseInt(document.getElementById('ti_so_chuyen_doi').value) || 1;
-        const soLuongDonVi = soLuong * tiSoChuyenDoi;
-        document.getElementById('so_luong_don_vi').value = soLuongDonVi;
+       const soLuong = parseInt(document.getElementById('so_luong').value) || 0;
+        const tiSo = parseInt(document.getElementById('ti_so_chuyen_doi').value) || 0;
+
+        const dvNhapHangSelect = document.getElementById('dv_nhap_hang');
+        const dvCoBanSelect = document.getElementById('don_vi_co_ban');
+
+        const dvNhapHang = dvNhapHangSelect.options[dvNhapHangSelect.selectedIndex]?.text || '';
+        const dvCoBan = dvCoBanSelect.options[dvCoBanSelect.selectedIndex]?.text || '';
+
+        if (tiSo <= 0 || soLuong <= 0) {
+            document.getElementById('so_luong_don_vi').value = '';
+            return;
+        }
+
+        const soDonViNhap = Math.floor(soLuong / tiSo);
+        const soDu = soLuong % tiSo;
+
+        let result = [];
+
+        if (soDonViNhap > 0 && dvNhapHang) {
+            result.push(`${soDonViNhap} ${dvNhapHang}`);
+        }
+
+        if (soDu > 0 && dvCoBan) {
+            result.push(`${soDu} ${dvCoBan}`);
+        }
+
+        document.getElementById('so_luong_don_vi').value = result.join(' ');
     }
 
+    // Lắng nghe thay đổi
     document.getElementById('so_luong').addEventListener('input', calculateSoLuongDonVi);
     document.getElementById('ti_so_chuyen_doi').addEventListener('input', calculateSoLuongDonVi);
+    document.getElementById('dv_nhap_hang').addEventListener('change', calculateSoLuongDonVi);
+    document.getElementById('don_vi_co_ban').addEventListener('change', calculateSoLuongDonVi);
 
     // Tính toán ban đầu
     calculateSoLuongDonVi();
