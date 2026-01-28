@@ -45,8 +45,9 @@
                         <th style="width: 80px;" class="text-center">Số lượng</th>
                         <th style="width: 80px;" class="text-center">Tỉ số</th>
                         <th style="width: 80px;" class="text-center">SL đơn vị</th>
+                        <th style="width: 100px;" class="text-center">Đơn vị bán</th>
                         <th style="width: 150px;">Ghi chú</th>
-                        <th style="width: 120px;" class="text-center">Thao tác</th>
+                        <th style="width: 150px;" class="text-center">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody id="sanPhamTableBody">
