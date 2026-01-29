@@ -61,15 +61,53 @@
             </div>
         </div>
 
+        <!-- Thống kê tổng quan -->
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <div class="card border-info">
+                    <div class="card-body text-center py-2">
+                        <h6 class="text-muted mb-1 small">Tổng doanh thu</h6>
+                        <h5 class="mb-0 text-info" id="tongTienCard">{{ number_format($tongTien, 0, ',', '.') }}đ</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-warning">
+                    <div class="card-body text-center py-2">
+                        <h6 class="text-muted mb-1 small">Tổng giá vốn</h6>
+                        <h5 class="mb-0 text-warning" id="tongGiaVonCard">{{ number_format($tongGiaVon, 0, ',', '.') }}đ</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-success">
+                    <div class="card-body text-center py-2">
+                        <h6 class="text-muted mb-1 small">Lợi nhuận</h6>
+                        <h5 class="mb-0 text-success" id="tongLoiNhuanCard">{{ number_format($tongLoiNhuan, 0, ',', '.') }}đ</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-primary">
+                    <div class="card-body text-center py-2">
+                        <h6 class="text-muted mb-1 small">Tỷ lệ lợi nhuận</h6>
+                        <h5 class="mb-0 text-primary" id="tyLeLoiNhuanCard">{{ number_format($tyLeLoiNhuan, 1) }}%</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="table-responsive">
             <table class="table table-striped table-hover" id="donHangTable">
                 <thead>
                     <tr>
-                        <th style="width: 60px;">STT</th>
+                        <th style="width: 50px;">STT</th>
                         <th>Tên sản phẩm</th>
-                        <th style="width: 120px;" class="text-center">Số lượng</th>
-                        <th style="width: 150px;" class="text-end">Giá</th>
-                        <th style="width: 150px;" class="text-end">Thành tiền</th>
+                        <th style="width: 100px;" class="text-center">Số lượng</th>
+                        <th style="width: 120px;" class="text-end">Giá bán</th>
+                        <th style="width: 120px;" class="text-end">Giá vốn</th>
+                        <th style="width: 130px;" class="text-end">Thành tiền</th>
+                        <th style="width: 130px;" class="text-end">Lợi nhuận</th>
                         <th style="width: 120px;" class="text-center">Thao tác</th>
                     </tr>
                 </thead>
@@ -80,7 +118,12 @@
                         <td>{{ $dh->ten_san_pham }}</td>
                         <td class="text-center">{{ $dh->so_luong }} {{ $dh->sanPhamDonVi->donViBan->ten_don_vi ?? '' }}</td>
                         <td class="text-end">{{ number_format($dh->gia, 0, ',', '.') }}</td>
-                        <td class="text-end">{{ number_format($dh->so_luong * $dh->gia, 0, ',', '.') }}</td>
+                        <td class="text-end text-muted">{{ number_format($dh->gia_nhap, 0, ',', '.') }}</td>
+                        <td class="text-end">{{ number_format($dh->thanh_tien, 0, ',', '.') }}</td>
+                        <td class="text-end {{ $dh->loi_nhuan >= 0 ? 'text-success' : 'text-danger' }}">
+                            {{ number_format($dh->loi_nhuan, 0, ',', '.') }}
+                            <small>({{ number_format($dh->ty_le_loi_nhuan, 1) }}%)</small>
+                        </td>
                         <td class="text-center">
                             <button type="button" class="btn btn-warning btn-action" onclick="editDonHang({{ $dh->id }})" title="Sửa">
                                 <i class="fas fa-edit"></i>
@@ -92,14 +135,15 @@
                     </tr>
                     @empty
                     <tr id="emptyRow">
-                        <td colspan="6" class="text-center text-muted">Chưa có đơn hàng nào{{ ($isFiltering ?? false) ? ' phù hợp với bộ lọc' : ' trong ngày' }}</td>
+                        <td colspan="8" class="text-center text-muted">Chưa có đơn hàng nào{{ ($isFiltering ?? false) ? ' phù hợp với bộ lọc' : ' trong ngày' }}</td>
                     </tr>
                     @endforelse
                 </tbody>
                 <tfoot>
                     <tr class="table-primary">
-                        <th colspan="4" class="text-end">Tổng cộng:</th>
+                        <th colspan="5" class="text-end">Tổng cộng:</th>
                         <th class="text-end" id="tongTien">{{ number_format($tongTien, 0, ',', '.') }}</th>
+                        <th class="text-end text-success" id="tongLoiNhuan">{{ number_format($tongLoiNhuan, 0, ',', '.') }}</th>
                         <th></th>
                     </tr>
                 </tfoot>
