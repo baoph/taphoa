@@ -71,16 +71,16 @@ class DonHangController extends Controller
         }
 
         return view('don-hang.index', compact(
-            'donHangs', 
-            'ngay', 
-            'tongTien', 
+            'donHangs',
+            'ngay',
+            'tongTien',
             'tongGiaVon',      // ← THÊM MỚI
             'tongLoiNhuan',    // ← THÊM MỚI
             'tyLeLoiNhuan',    // ← THÊM MỚI
-            'sanPhams', 
-            'tuNgay', 
-            'denNgay', 
-            'sanPhamId', 
+            'sanPhams',
+            'tuNgay',
+            'denNgay',
+            'sanPhamId',
             'isFiltering'
         ));
     }
@@ -118,25 +118,25 @@ class DonHangController extends Controller
             if ($sanPham) {
                 // Lấy giá nhập đơn vị cơ bản (ví dụ: giá nhập 1 thùng)
                 $giaNhapCoBan = $sanPham->gia_nhap ?? 0;
-                
+
                 // Tính giá vốn theo đơn vị bán
                 if ($request->don_vi_ban_id) {
+                    $sanPhamDonViNhap = \App\Models\SanPhamDonVi::where('san_pham_id', $request->san_pham_id)->orderBy('ti_le_quy_doi', 'desc')->first();
+                    $giaNhapCoBan = $giaNhapCoBan / $sanPhamDonViNhap->ti_le_quy_doi;
+
                     $sanPhamDonVi = \App\Models\SanPhamDonVi::where('san_pham_id', $request->san_pham_id)
-                        ->where('don_vi_ban_id', $request->don_vi_ban_id)
+                        ->where('id', $request->don_vi_ban_id)
                         ->first();
-                    
-                    if ($sanPhamDonVi && $sanPhamDonVi->ti_le_quy_doi > 0) {
-                        // Chia giá nhập cho tỷ lệ quy đổi để có giá vốn đơn vị bán
-                        $giaNhap = $giaNhapCoBan / $sanPhamDonVi->ti_le_quy_doi;
-                    } else {
-                        // Nếu không có tỷ lệ quy đổi hoặc = 0, dùng giá nhập cơ bản
-                        $giaNhap = $giaNhapCoBan;
+                    if ($sanPhamDonVi->id == $sanPhamDonViNhap->id) {
+                        $giaNhap = $sanPham->gia_nhap;
+                    } elseif ($sanPhamDonVi != $sanPhamDonViNhap) {
+                        $giaNhap = $giaNhapCoBan * $sanPhamDonVi->ti_le_quy_doi;
                     }
                 } else {
                     // Không có đơn vị bán, dùng giá nhập cơ bản
                     $giaNhap = $giaNhapCoBan;
                 }
-                
+
                 // Trừ tồn kho
                 if (!$sanPham->truTonKho($soLuongQuyDoi)) {
                     return response()->json([
@@ -240,13 +240,13 @@ class DonHangController extends Controller
             if ($sanPham) {
                 // Lấy giá nhập đơn vị cơ bản (ví dụ: giá nhập 1 thùng)
                 $giaNhapCoBan = $sanPham->gia_nhap ?? 0;
-                
+
                 // Tính giá vốn theo đơn vị bán
                 if ($request->don_vi_ban_id) {
                     $sanPhamDonVi = \App\Models\SanPhamDonVi::where('san_pham_id', $request->san_pham_id)
                         ->where('don_vi_ban_id', $request->don_vi_ban_id)
                         ->first();
-                    
+
                     if ($sanPhamDonVi && $sanPhamDonVi->ti_le_quy_doi > 0) {
                         // Chia giá nhập cho tỷ lệ quy đổi để có giá vốn đơn vị bán
                         $giaNhap = $giaNhapCoBan / $sanPhamDonVi->ti_le_quy_doi;
@@ -258,7 +258,7 @@ class DonHangController extends Controller
                     // Không có đơn vị bán, dùng giá nhập cơ bản
                     $giaNhap = $giaNhapCoBan;
                 }
-                
+
                 // Trừ tồn kho mới
                 if (!$sanPham->truTonKho($soLuongQuyDoi)) {
                     return response()->json([
