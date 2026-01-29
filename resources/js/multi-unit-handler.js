@@ -15,6 +15,9 @@ const MultiUnitHandler = {
     currentDonViList: [],
     currentTonKho: 0,
     currentDonViCoBan: '',
+    isEditMode: false,
+    editDonViBanId: null,
+    editSoLuongQuyDoi: 0,
 
     /**
      * Khởi tạo handler
@@ -103,14 +106,24 @@ const MultiUnitHandler = {
                     self.currentTonKho = sanPham.so_luong || 0;
                     self.currentDonViCoBan = sanPham.don_vi_co_ban || '';
 
+                    // Nếu đang edit, cộng lại số lượng đã bán vào tồn kho để hiển thị đúng
+                    if (self.isEditMode && self.editSoLuongQuyDoi > 0) {
+                        self.currentTonKho += self.editSoLuongQuyDoi;
+                        console.log('Edit mode: Adjusted stock =', self.currentTonKho);
+                    }
+
                     // Populate dropdown
                     self.populateDonViDropdown(donViList);
 
                     // Hiển thị thông tin tồn kho
                     self.updateTonKhoDisplay();
 
-                    // Tự động chọn đơn vị đầu tiên nếu có
-                    if (donViList.length > 0) {
+                    // Nếu đang edit và có don_vi_ban_id, chọn đơn vị đó
+                    if (self.isEditMode && self.editDonViBanId) {
+                        console.log('Setting edit don_vi_ban_id:', self.editDonViBanId);
+                        $('#donViBanId').val(self.editDonViBanId).trigger('change');
+                    } else if (donViList.length > 0) {
+                        // Tự động chọn đơn vị đầu tiên nếu có (chỉ khi không phải edit mode)
                         $('#donViBanId').val(donViList[0].id).trigger('change');
                     }
                 } else {
@@ -313,6 +326,18 @@ const MultiUnitHandler = {
     },
 
     /**
+     * Thiết lập chế độ edit với thông tin đơn hàng cũ
+     * @param {number} donViBanId - ID đơn vị bán cũ
+     * @param {number} soLuongQuyDoi - Số lượng quy đổi cũ (để cộng lại vào tồn kho)
+     */
+    setEditMode: function(donViBanId, soLuongQuyDoi) {
+        this.isEditMode = true;
+        this.editDonViBanId = donViBanId;
+        this.editSoLuongQuyDoi = soLuongQuyDoi || 0;
+        console.log('Edit mode enabled:', { donViBanId, soLuongQuyDoi });
+    },
+
+    /**
      * Reset form về trạng thái ban đầu
      */
     resetForm: function() {
@@ -320,6 +345,9 @@ const MultiUnitHandler = {
         this.currentDonViList = [];
         this.currentTonKho = 0;
         this.currentDonViCoBan = '';
+        this.isEditMode = false;
+        this.editDonViBanId = null;
+        this.editSoLuongQuyDoi = 0;
         this.resetDonViDropdown();
         $('#tonKhoWarning').remove();
     }
