@@ -48,17 +48,41 @@ class DonHangController extends Controller
             return $item->so_luong * $item->gia;
         });
 
+        // ========== THÊM MỚI: Tính tổng giá vốn và lợi nhuận ==========
+        $tongGiaVon = $donHangs->sum(function ($item) {
+            return $item->so_luong * $item->gia_nhap;
+        });
+
+        $tongLoiNhuan = $tongTien - $tongGiaVon;
+        $tyLeLoiNhuan = $tongTien > 0 ? ($tongLoiNhuan / $tongTien) * 100 : 0;
+        // ==============================================================
+
         // Lấy danh sách sản phẩm cho filter dropdown
         $sanPhams = SanPham::orderBy('ten_san_pham')->get();
 
         if ($request->ajax()) {
             return response()->json([
                 'donHangs' => $donHangs,
-                'tongTien' => $tongTien
+                'tongTien' => $tongTien,
+                'tongGiaVon' => $tongGiaVon,        // ← THÊM MỚI
+                'tongLoiNhuan' => $tongLoiNhuan,    // ← THÊM MỚI
+                'tyLeLoiNhuan' => $tyLeLoiNhuan,    // ← THÊM MỚI
             ]);
         }
 
-        return view('don-hang.index', compact('donHangs', 'ngay', 'tongTien', 'sanPhams', 'tuNgay', 'denNgay', 'sanPhamId', 'isFiltering'));
+        return view('don-hang.index', compact(
+            'donHangs', 
+            'ngay', 
+            'tongTien', 
+            'tongGiaVon',      // ← THÊM MỚI
+            'tongLoiNhuan',    // ← THÊM MỚI
+            'tyLeLoiNhuan',    // ← THÊM MỚI
+            'sanPhams', 
+            'tuNgay', 
+            'denNgay', 
+            'sanPhamId', 
+            'isFiltering'
+        ));
     }
 
     public function store(Request $request)
@@ -84,10 +108,15 @@ class DonHangController extends Controller
             }
         }
 
-        // Trừ tồn kho
+        // ========== THÊM MỚI: Lấy giá nhập từ sản phẩm ==========
+        $giaNhap = 0;
         if ($request->san_pham_id) {
             $sanPham = SanPham::find($request->san_pham_id);
             if ($sanPham) {
+                // Lấy giá nhập từ sản phẩm (snapshot tại thời điểm bán)
+                $giaNhap = $sanPham->gia_nhap ?? 0;
+                
+                // Trừ tồn kho
                 if (!$sanPham->truTonKho($soLuongQuyDoi)) {
                     return response()->json([
                         'success' => false,
@@ -96,12 +125,14 @@ class DonHangController extends Controller
                 }
             }
         }
+        // ========================================================
 
         $donHang = DonHang::create([
             'san_pham_id' => $request->san_pham_id,
             'ten_san_pham' => $request->ten_san_pham,
             'so_luong' => $request->so_luong,
             'gia' => $request->gia,
+            'gia_nhap' => $giaNhap,  // ← THÊM MỚI
             'ngay_ban' => $request->ngay_ban,
             'don_vi_ban_id' => $request->don_vi_ban_id,
             'so_luong_quy_doi' => $soLuongQuyDoi,
@@ -116,7 +147,9 @@ class DonHangController extends Controller
                 'ten_san_pham' => $donHang->ten_san_pham,
                 'so_luong' => $donHang->so_luong,
                 'gia' => $donHang->gia,
-                'thanh_tien' => $donHang->so_luong * $donHang->gia,
+                'gia_nhap' => $donHang->gia_nhap,  // ← THÊM MỚI
+                'thanh_tien' => $donHang->thanh_tien,
+                'loi_nhuan' => $donHang->loi_nhuan,  // ← THÊM MỚI
                 'ngay_ban' => $donHang->ngay_ban->format('Y-m-d'),
             ],
         ]);
@@ -176,10 +209,15 @@ class DonHangController extends Controller
             }
         }
 
-        // Trừ tồn kho mới
+        // ========== THÊM MỚI: Lấy giá nhập mới ==========
+        $giaNhap = $donHang->gia_nhap; // Giữ nguyên giá cũ nếu không có sản phẩm
         if ($request->san_pham_id) {
             $sanPham = SanPham::find($request->san_pham_id);
             if ($sanPham) {
+                // Cập nhật giá nhập mới từ sản phẩm
+                $giaNhap = $sanPham->gia_nhap ?? 0;
+                
+                // Trừ tồn kho mới
                 if (!$sanPham->truTonKho($soLuongQuyDoi)) {
                     return response()->json([
                         'success' => false,
@@ -188,12 +226,14 @@ class DonHangController extends Controller
                 }
             }
         }
+        // ================================================
 
         $donHang->update([
             'san_pham_id' => $request->san_pham_id,
             'ten_san_pham' => $request->ten_san_pham,
             'so_luong' => $request->so_luong,
             'gia' => $request->gia,
+            'gia_nhap' => $giaNhap,  // ← THÊM MỚI
             'ngay_ban' => $request->ngay_ban,
             'don_vi_ban_id' => $request->don_vi_ban_id,
             'so_luong_quy_doi' => $soLuongQuyDoi,
@@ -207,7 +247,9 @@ class DonHangController extends Controller
                 'ten_san_pham' => $donHang->ten_san_pham,
                 'so_luong' => $donHang->so_luong,
                 'gia' => $donHang->gia,
-                'thanh_tien' => $donHang->so_luong * $donHang->gia,
+                'gia_nhap' => $donHang->gia_nhap,  // ← THÊM MỚI
+                'thanh_tien' => $donHang->thanh_tien,
+                'loi_nhuan' => $donHang->loi_nhuan,  // ← THÊM MỚI
                 'ngay_ban' => $donHang->ngay_ban->format('Y-m-d'),
             ],
         ]);
