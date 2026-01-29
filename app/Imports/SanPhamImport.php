@@ -42,7 +42,7 @@ class SanPhamImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
 
                 // Lấy tên sản phẩm
                 $tenSanPham = $row['ten_san_pham'] ?? $row['hang'] ?? '';
-                
+
                 if (empty(trim($tenSanPham))) {
                     $this->errors[] = "Dòng {$rowNumber}: Tên sản phẩm không được để trống";
                     DB::rollBack();
@@ -95,6 +95,16 @@ class SanPhamImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
                 // TẠO CÁC ĐƠN VỊ BÁN TRONG san_pham_don_vi
                 // ========================================
 
+                // 2. Đơn vị nhập hàng (đơn vị lớn - nếu khác đơn vị cơ bản)
+                if ($dvNhapHangId && $dvNhapHangId != $donViCoBanId) {
+                    SanPhamDonVi::create([
+                        'san_pham_id' => $sanPham->id,
+                        'don_vi_ban_id' => $dvNhapHangId,
+                        'ti_le_quy_doi' => $tiSoChuyenDoi,
+                        'gia_ban' => $giaBan,
+                    ]);
+                }
+
                 // 1. Đơn vị cơ bản (đơn vị nhỏ nhất, ti_le_quy_doi = 1)
                 if ($donViCoBanId) {
                     SanPhamDonVi::create([
@@ -105,15 +115,7 @@ class SanPhamImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
                     ]);
                 }
 
-                // 2. Đơn vị nhập hàng (đơn vị lớn - nếu khác đơn vị cơ bản)
-                if ($dvNhapHangId && $dvNhapHangId != $donViCoBanId) {
-                    SanPhamDonVi::create([
-                        'san_pham_id' => $sanPham->id,
-                        'don_vi_ban_id' => $dvNhapHangId,
-                        'ti_le_quy_doi' => $tiSoChuyenDoi,
-                        'gia_ban' => $giaBan,
-                    ]);
-                }
+
 
                 // 3. Đơn vị trung gian (lốc - nếu có)
                 $donViTrungText = trim($row['don_vi_trung'] ?? '');

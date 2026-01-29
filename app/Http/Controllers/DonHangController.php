@@ -93,7 +93,7 @@ class DonHangController extends Controller
             'so_luong' => 'required|numeric|min:0.01',
             'gia' => 'required|numeric|min:0',
             'ngay_ban' => 'required|date',
-            'don_vi_ban_id' => 'nullable|exists:don_vi_ban,id',
+            'don_vi_ban_id' => 'nullable|exists:san_pham_don_vi,id',
         ]);
 
         // Tính số lượng quy đổi về đơn vị cơ bản
@@ -231,7 +231,7 @@ class DonHangController extends Controller
         }
 
         // ========== TÍNH GIÁ VỐN THEO ĐƠN VỊ BÁN (GIỐNG STORE) ==========
-        // Công thức: 
+        // Công thức:
         // 1. Tìm đơn vị lớn nhất (ti_le_quy_doi cao nhất) - đây là đơn vị nhập hàng
         // 2. Tính giá vốn đơn vị nhỏ nhất = giá nhập / ti_le_quy_doi lớn nhất
         // 3. Nếu bán đơn vị lớn nhất → giá vốn = giá nhập gốc
@@ -252,16 +252,16 @@ class DonHangController extends Controller
                     $sanPhamDonViNhap = \App\Models\SanPhamDonVi::where('san_pham_id', $request->san_pham_id)
                         ->orderBy('ti_le_quy_doi', 'desc')
                         ->first();
-                    
+
                     if ($sanPhamDonViNhap && $sanPhamDonViNhap->ti_le_quy_doi > 0) {
                         // Tính giá vốn đơn vị nhỏ nhất
                         $giaVonDonViNhoNhat = $giaNhapCoBan / $sanPhamDonViNhap->ti_le_quy_doi;
-                        
+
                         // Tìm đơn vị bán hiện tại
                         $sanPhamDonVi = \App\Models\SanPhamDonVi::where('san_pham_id', $request->san_pham_id)
                             ->where('id', $request->don_vi_ban_id)
                             ->first();
-                        
+
                         if ($sanPhamDonVi) {
                             if ($sanPhamDonVi->id == $sanPhamDonViNhap->id) {
                                 // Nếu bán theo đơn vị lớn nhất (đơn vị nhập), dùng giá nhập gốc
