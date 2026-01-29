@@ -230,10 +230,15 @@ class DonHangController extends Controller
             }
         }
 
-        // ========== THÊM MỚI: Tính giá vốn theo đơn vị bán ==========
-        // Công thức: gia_von_don_vi_ban = gia_nhap_co_ban / ti_le_quy_doi
+        // ========== TÍNH GIÁ VỐN THEO ĐƠN VỊ BÁN (GIỐNG STORE) ==========
+        // Công thức: 
+        // 1. Tìm đơn vị lớn nhất (ti_le_quy_doi cao nhất) - đây là đơn vị nhập hàng
+        // 2. Tính giá vốn đơn vị nhỏ nhất = giá nhập / ti_le_quy_doi lớn nhất
+        // 3. Nếu bán đơn vị lớn nhất → giá vốn = giá nhập gốc
+        //    Ngược lại → giá vốn = giá vốn đơn vị nhỏ nhất × ti_le_quy_doi đơn vị bán
         // Ví dụ: 1 thùng bia giá nhập 240,000đ, 1 thùng = 24 lon
         //        → Giá vốn khi bán theo lon = 240,000 / 24 = 10,000đ/lon
+        //        → Giá vốn khi bán theo lốc (6 lon) = 10,000 × 6 = 60,000đ/lốc
         $giaNhap = $donHang->gia_nhap; // Giữ nguyên giá cũ nếu không có sản phẩm
         if ($request->san_pham_id) {
             $sanPham = SanPham::find($request->san_pham_id);
@@ -243,15 +248,32 @@ class DonHangController extends Controller
 
                 // Tính giá vốn theo đơn vị bán
                 if ($request->don_vi_ban_id) {
-                    $sanPhamDonVi = \App\Models\SanPhamDonVi::where('san_pham_id', $request->san_pham_id)
-                        ->where('don_vi_ban_id', $request->don_vi_ban_id)
+                    // Tìm đơn vị nhập hàng (đơn vị có ti_le_quy_doi lớn nhất)
+                    $sanPhamDonViNhap = \App\Models\SanPhamDonVi::where('san_pham_id', $request->san_pham_id)
+                        ->orderBy('ti_le_quy_doi', 'desc')
                         ->first();
-
-                    if ($sanPhamDonVi && $sanPhamDonVi->ti_le_quy_doi > 0) {
-                        // Chia giá nhập cho tỷ lệ quy đổi để có giá vốn đơn vị bán
-                        $giaNhap = $giaNhapCoBan / $sanPhamDonVi->ti_le_quy_doi;
+                    
+                    if ($sanPhamDonViNhap && $sanPhamDonViNhap->ti_le_quy_doi > 0) {
+                        // Tính giá vốn đơn vị nhỏ nhất
+                        $giaVonDonViNhoNhat = $giaNhapCoBan / $sanPhamDonViNhap->ti_le_quy_doi;
+                        
+                        // Tìm đơn vị bán hiện tại
+                        $sanPhamDonVi = \App\Models\SanPhamDonVi::where('san_pham_id', $request->san_pham_id)
+                            ->where('id', $request->don_vi_ban_id)
+                            ->first();
+                        
+                        if ($sanPhamDonVi) {
+                            if ($sanPhamDonVi->id == $sanPhamDonViNhap->id) {
+                                // Nếu bán theo đơn vị lớn nhất (đơn vị nhập), dùng giá nhập gốc
+                                $giaNhap = $giaNhapCoBan;
+                            } else {
+                                // Ngược lại, tính giá vốn = giá vốn đơn vị nhỏ nhất × ti_le_quy_doi
+                                $giaNhap = $giaVonDonViNhoNhat * $sanPhamDonVi->ti_le_quy_doi;
+                            }
+                        } else {
+                            $giaNhap = $giaNhapCoBan;
+                        }
                     } else {
-                        // Nếu không có tỷ lệ quy đổi hoặc = 0, dùng giá nhập cơ bản
                         $giaNhap = $giaNhapCoBan;
                     }
                 } else {
