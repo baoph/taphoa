@@ -71,7 +71,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('bao-cao.*') ? 'active' : '' }}" href="{{ route('bao-cao.doanh-thu') }}">
+                        <a class="nav-link {{ request()->routeIs('bao-cao.*') ? 'active' : '' }}" href="{{ route('bao-cao.index') }}">
                             <i class="fas fa-chart-bar me-1"></i>Báo cáo
                         </a>
                     </li>

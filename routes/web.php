@@ -57,4 +57,11 @@ Route::put('nhap-hang/{nhapHang}', [NhapHangController::class, 'update'])->name(
 Route::delete('nhap-hang/{nhapHang}', [NhapHangController::class, 'destroy'])->name('nhap-hang.destroy');
 
 // Báo cáo
-Route::get('bao-cao/doanh-thu', [BaoCaoController::class, 'doanhThu'])->name('bao-cao.doanh-thu');
+Route::prefix('bao-cao')->name('bao-cao.')->group(function () {
+    Route::get('/', [BaoCaoController::class, 'index'])->name('index');
+    Route::get('doanh-thu', [BaoCaoController::class, 'doanhThu'])->name('doanh-thu');
+    Route::get('loi-nhuan', [BaoCaoController::class, 'loiNhuan'])->name('loi-nhuan');
+    Route::get('san-pham-ban-chay', [BaoCaoController::class, 'sanPhamBanChay'])->name('san-pham-ban-chay');
+    Route::get('san-pham-nhap', [BaoCaoController::class, 'sanPhamNhap'])->name('san-pham-nhap');
+    Route::get('so-lieu-nhap', [BaoCaoController::class, 'soLieuNhap'])->name('so-lieu-nhap');
+});

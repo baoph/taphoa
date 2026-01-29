@@ -329,26 +329,37 @@
     function loadDonHang() {
         $.get('{{ route("don-hang.index") }}', { ngay: currentNgay }, function(response) {
             if (response.donHangs) {
-                renderTable(response.donHangs, response.tongTien);
+                renderTable(response.donHangs, response);
                 window.history.pushState({}, '', '{{ route("don-hang.index") }}?ngay=' + currentNgay);
             }
         });
     }
 
-    function renderTable(data, tongTien) {
+    function renderTable(data, totals) {
         let html = '';
         if (data.length === 0) {
-            html = '<tr id="emptyRow"><td colspan="6" class="text-center text-muted">Chưa có đơn hàng nào trong ngày</td></tr>';
+            html = '<tr id="emptyRow"><td colspan="8" class="text-center text-muted">Chưa có đơn hàng nào trong ngày</td></tr>';
         } else {
             data.forEach(function(dh, index) {
-                const donViTen = dh.san_pham_don_vi.don_vi_ban?.ten_don_vi ?? '';
+                const donViTen = dh.san_pham_don_vi?.don_vi_ban?.ten_don_vi ?? '';
+                const giaNhap = dh.gia_nhap || 0;
+                const thanhTien = dh.so_luong * dh.gia;
+                const loiNhuan = thanhTien - (dh.so_luong * giaNhap);
+                const tyLeLoiNhuan = thanhTien > 0 ? (loiNhuan / thanhTien) * 100 : 0;
+                const loiNhuanClass = loiNhuan >= 0 ? 'text-success' : 'text-danger';
+                
                 html += `
                     <tr data-id="${dh.id}">
                         <td>${index + 1}</td>
                         <td>${dh.ten_san_pham}</td>
                         <td class="text-center">${dh.so_luong} ${donViTen}</td>
                         <td class="text-end">${formatNumber(dh.gia)}</td>
-                        <td class="text-end">${formatNumber(dh.so_luong * dh.gia)}</td>
+                        <td class="text-end text-muted">${formatNumber(giaNhap)}</td>
+                        <td class="text-end">${formatNumber(thanhTien)}</td>
+                        <td class="text-end ${loiNhuanClass}">
+                            ${formatNumber(loiNhuan)}
+                            <small>(${tyLeLoiNhuan.toFixed(1)}%)</small>
+                        </td>
                         <td class="text-center">
                             <button type="button" class="btn btn-warning btn-action" onclick="editDonHang(${dh.id})" title="Sửa">
                                 <i class="fas fa-edit"></i>
@@ -362,7 +373,21 @@
             });
         }
         $('#donHangBody').html(html);
+        
+        // Cập nhật tổng trong bảng
+        const tongTien = totals.tongTien || 0;
+        const tongGiaVon = totals.tongGiaVon || 0;
+        const tongLoiNhuan = totals.tongLoiNhuan || 0;
+        const tyLeLoiNhuan = totals.tyLeLoiNhuan || 0;
+        
         $('#tongTien').text(formatNumber(tongTien));
+        $('#tongLoiNhuan').text(formatNumber(tongLoiNhuan));
+        
+        // Cập nhật các card thống kê
+        $('#tongTienCard').text(formatNumber(tongTien) + 'đ');
+        $('#tongGiaVonCard').text(formatNumber(tongGiaVon) + 'đ');
+        $('#tongLoiNhuanCard').text(formatNumber(tongLoiNhuan) + 'đ');
+        $('#tyLeLoiNhuanCard').text(tyLeLoiNhuan.toFixed(1) + '%');
     }
 
     function editDonHang(id) {
