@@ -137,6 +137,7 @@ class DonHangController extends Controller
                 'gia' => $donHang->gia,
                 'ngay_ban' => $donHang->ngay_ban->format('Y-m-d'),
                 'don_vi_ban_id' => $donHang->don_vi_ban_id,
+                'so_luong_quy_doi' => $donHang->so_luong_quy_doi,
             ],
         ]);
     }
