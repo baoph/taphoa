@@ -88,9 +88,9 @@
                 @if(session('warning'))
                     <div class="alert alert-warning alert-dismissible fade show" role="alert">
                         <i class="bi bi-exclamation-circle-fill"></i> {{ session('warning') }}
-                        @if(session('errors'))
+                        @if(session('import_errors'))
                             <ul class="mb-0 mt-2">
-                                @foreach(session('errors') as $error)
+                                @foreach(session('import_errors') as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>

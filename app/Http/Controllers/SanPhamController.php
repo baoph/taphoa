@@ -278,21 +278,17 @@ class SanPhamController extends Controller
             Excel::import($import, $file);
 
             // Kiểm tra lỗi
-            $errors = $import->errors();
+            $successCount = $import->getSuccessCount();
+            $errors = $import->getErrors();
 
-            if (count($errors) > 0) {
-                $errorMessages = [];
-                foreach ($errors as $error) {
-                    $errorMessages[] = "Dòng {$error->row()}: {$error->errors()[0]}";
-                }
-
+            if ($import->hasErrors()) {
                 return redirect()->back()
-                    ->with('warning', 'Import hoàn tất nhưng có một số lỗi:')
-                    ->with('errors', $errorMessages);
+                    ->with('warning', "Import hoàn tất: {$successCount} sản phẩm thành công, " . count($errors) . " lỗi.")
+                    ->with('import_errors', $errors);
             }
 
             return redirect()->route('san-pham.index')
-                ->with('success', 'Import dữ liệu thành công!');
+                ->with('success', "Import thành công {$successCount} sản phẩm!");
 
         } catch (\Exception $e) {
             return redirect()->back()
