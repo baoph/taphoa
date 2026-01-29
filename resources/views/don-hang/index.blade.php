@@ -330,7 +330,7 @@
 
                 // Thiết lập chế độ edit trong MultiUnitHandler
                 // Truyền don_vi_ban_id và so_luong_quy_doi để xử lý đúng
-                MultiUnitHandler.setEditMode(dh.don_vi_ban_id, dh.so_luong_quy_doi || 0);
+                MultiUnitHandler.setEditMode(dh.san_pham_id, dh.don_vi_ban_id, dh.so_luong_quy_doi || 0);
 
                 const option = new Option(dh.ten_san_pham, dh.san_pham_id || dh.ten_san_pham, true, true);
                 $('#tenSanPham').append(option).trigger('change');

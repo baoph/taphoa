@@ -126,6 +126,7 @@ class SanPhamDonViController extends Controller
                     'ten_san_pham' => $sanPham->ten_san_pham,
                     'so_luong' => $sanPham->so_luong,
                     'don_vi_co_ban_text' => $sanPham->don_vi_co_ban_text,
+                    'ton_kho_hien_thi' => $sanPham->ton_kho_hien_thi,
                 ],
                 'don_vi_list' => $options,
             ],

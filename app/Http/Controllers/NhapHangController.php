@@ -97,6 +97,8 @@ class NhapHangController extends Controller
             $sanPham = SanPham::find($request->san_pham_id);
             if ($sanPham) {
                 $sanPham->congTonKho($soLuongQuyDoi);
+                $sanPham->gia_nhap = $request->gia_nhap;
+                $sanPham->save();
             }
         }
 
@@ -167,6 +169,8 @@ class NhapHangController extends Controller
             $sanPham = SanPham::find($nhapHang->san_pham_id);
             if ($sanPham) {
                 $sanPham->truTonKho($nhapHang->so_luong_quy_doi);
+                $sanPham->gia_nhap = $request->gia_nhap;
+                $sanPham->save();
             }
         }
 
@@ -187,6 +191,8 @@ class NhapHangController extends Controller
             $sanPham = SanPham::find($request->san_pham_id);
             if ($sanPham) {
                 $sanPham->congTonKho($soLuongQuyDoi);
+                $sanPham->gia_nhap = $request->gia_nhap;
+                $sanPham->save();
             }
         }
 

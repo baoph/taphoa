@@ -236,6 +236,7 @@ class SanPhamController extends Controller
                         'ten_san_pham' => $sanPham->ten_san_pham,
                         'don_vi_co_ban' => $sanPham->don_vi_co_ban ?? $sanPham->dv_nhap_hang ?? 'cái',
                         'so_luong' => (float) ($sanPham->so_luong ?? 0),
+                        'ton_kho_hien_thi' => $sanPham->ton_kho_hien_thi,
                     ],
                     'don_vi_list' => $donViList,
                 ],

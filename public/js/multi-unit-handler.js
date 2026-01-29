@@ -15,6 +15,7 @@ const MultiUnitHandler = {
     currentDonViList: [],
     currentTonKho: 0,
     currentDonViCoBan: '',
+    tonKhoHienThi: '',
     isEditMode: false,
     editDonViBanId: null,
     editSoLuongQuyDoi: 0,
@@ -100,17 +101,12 @@ const MultiUnitHandler = {
                         self.resetDonViDropdown();
                         return;
                     }
-
                     self.currentSanPham = sanPham;
                     self.currentDonViList = donViList;
                     self.currentTonKho = sanPham.so_luong || 0;
                     self.currentDonViCoBan = sanPham.don_vi_co_ban || '';
+                    self.tonKhoHienThi = sanPham.ton_kho_hien_thi || '';
 
-                    // Nếu đang edit, cộng lại số lượng đã bán vào tồn kho để hiển thị đúng
-                    if (self.isEditMode && self.editSoLuongQuyDoi > 0) {
-                        self.currentTonKho += self.editSoLuongQuyDoi;
-                        console.log('Edit mode: Adjusted stock =', self.currentTonKho);
-                    }
 
                     // Populate dropdown
                     self.populateDonViDropdown(donViList);
@@ -119,6 +115,7 @@ const MultiUnitHandler = {
                     self.updateTonKhoDisplay();
 
                     // Nếu đang edit và có don_vi_ban_id, chọn đơn vị đó
+                    console.log('isEditMode:', self.isEditMode, 'editDonViBanId:', self.editDonViBanId);
                     if (self.isEditMode && self.editDonViBanId) {
                         console.log('Setting edit don_vi_ban_id:', self.editDonViBanId);
                         $('#donViBanId').val(self.editDonViBanId).trigger('change');
@@ -266,7 +263,7 @@ const MultiUnitHandler = {
         const html = `
             <div class="alert alert-info py-2 mb-0">
                 <i class="fas fa-box"></i>
-                <strong>Tồn kho:</strong> ${this.formatNumber(this.currentTonKho)} ${this.currentDonViCoBan}
+                <strong>Tồn kho:</strong>  ${this.tonKhoHienThi}
             </div>
         `;
         $('#tonKhoInfo').html(html);
@@ -330,11 +327,11 @@ const MultiUnitHandler = {
      * @param {number} donViBanId - ID đơn vị bán cũ
      * @param {number} soLuongQuyDoi - Số lượng quy đổi cũ (để cộng lại vào tồn kho)
      */
-    setEditMode: function(donViBanId, soLuongQuyDoi) {
+    setEditMode: function(sanphamId,donViBanId, soLuongQuyDoi) {
         this.isEditMode = true;
         this.editDonViBanId = donViBanId;
         this.editSoLuongQuyDoi = soLuongQuyDoi || 0;
-        console.log('Edit mode enabled:', { donViBanId, soLuongQuyDoi });
+        this.loadDonViOptions(sanphamId);
     },
 
     /**
