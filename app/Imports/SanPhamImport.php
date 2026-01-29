@@ -4,77 +4,182 @@ namespace App\Imports;
 
 use App\Models\SanPham;
 use App\Models\DonViBan;
-use Maatwebsite\Excel\Concerns\ToModel;
+use App\Models\SanPhamDonVi;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
-use Maatwebsite\Excel\Concerns\SkipsOnError;
-use Maatwebsite\Excel\Concerns\SkipsErrors;
 
-class SanPhamImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmptyRows, SkipsOnError
+class SanPhamImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
 {
-    use SkipsErrors;
-
     /**
      * Cache danh sách đơn vị bán để tránh query nhiều lần
      */
     protected $donViBanCache = null;
 
     /**
-     * Map dữ liệu từ Excel vào Model
+     * Danh sách errors
      */
-    public function model(array $row)
+    protected $errors = [];
+
+    /**
+     * Số sản phẩm đã import thành công
+     */
+    protected $successCount = 0;
+
+    /**
+     * Import collection từ Excel
+     * Xử lý cả san_pham và san_pham_don_vi
+     */
+    public function collection(Collection $rows)
     {
-        // Lấy tên sản phẩm
-        $tenSanPham = $row['ten_san_pham'] ?? $row['hang'] ?? '';
+        foreach ($rows as $index => $row) {
+            $rowNumber = $index + 2; // +2 vì index 0-based và có heading row
 
-        // Xử lý format số tiền
-        $giaNhap = $this->cleanMoneyFormat($row['gia_nhap'] ?? $row['gia_nhap_vao'] ?? 0);
-        $giaBan = $this->cleanMoneyFormat($row['gia_ban'] ?? $row['gia_ban_ra'] ?? 0);
-        $giaBanLe = $this->cleanMoneyFormat($row['gia_ban_le'] ?? 0);
+            try {
+                DB::beginTransaction();
 
-        // Xử lý số lượng
-        $soLuong = $this->cleanNumberFormat($row['so_luong'] ?? $row['so_luong_hang'] ?? 0);
+                // Lấy tên sản phẩm
+                $tenSanPham = $row['ten_san_pham'] ?? $row['hang'] ?? '';
+                
+                if (empty(trim($tenSanPham))) {
+                    $this->errors[] = "Dòng {$rowNumber}: Tên sản phẩm không được để trống";
+                    DB::rollBack();
+                    continue;
+                }
 
-        // Xử lý đơn vị bán (đơn vị cơ bản - đơn vị nhỏ nhất để bán lẻ)
-        $donViBanText = trim($row['don_vi_ban'] ?? $row['don_vi_co_ban'] ?? '');
-        $donViCoBan = $this->lookupDonViBanId($donViBanText);
+                // Xử lý format số tiền
+                $giaNhap = $this->cleanMoneyFormat($row['gia_nhap'] ?? $row['gia_nhap_vao'] ?? 0);
+                $giaBan = $this->cleanMoneyFormat($row['gia_ban'] ?? $row['gia_ban_ra'] ?? 0);
+                $giaBanLe = $this->cleanMoneyFormat($row['gia_ban_le'] ?? 0);
 
-        // Xử lý đơn vị nhập hàng (đơn vị lớn - thùng, lốc, etc.)
-        $donViNhapText = trim($row['don_vi_nhap'] ?? $row['don_vi_nhap_hang'] ?? $row['dv_nhap_hang'] ?? '');
-        $dvNhapHang = $this->lookupDonViBanId($donViNhapText);
+                // Xử lý số lượng
+                $soLuong = $this->cleanNumberFormat($row['so_luong'] ?? $row['so_luong_hang'] ?? 0);
 
-        // Tỉ số chuyển đổi (số đơn vị bán trong 1 đơn vị nhập)
-        $tiSoChuyenDoi = $this->cleanNumberFormat($row['ti_so_chuyen_doi'] ?? $row['ti_le_quy_doi'] ?? 1);
-        if ($tiSoChuyenDoi <= 0) {
-            $tiSoChuyenDoi = 1;
+                // Xử lý đơn vị cơ bản (đơn vị nhỏ nhất để bán lẻ)
+                $donViCoBanText = trim($row['don_vi_co_ban'] ?? $row['don_vi_ban'] ?? '');
+                $donViCoBanId = $this->lookupOrCreateDonViBan($donViCoBanText);
+
+                // Xử lý đơn vị nhập hàng (đơn vị lớn - thùng, lốc, etc.)
+                $donViNhapText = trim($row['don_vi_nhap'] ?? $row['don_vi_nhap_hang'] ?? $row['dv_nhap_hang'] ?? '');
+                $dvNhapHangId = $this->lookupOrCreateDonViBan($donViNhapText);
+
+                // Tỉ số chuyển đổi (số đơn vị cơ bản trong 1 đơn vị nhập)
+                $tiSoChuyenDoi = $this->cleanNumberFormat($row['ti_so_chuyen_doi'] ?? $row['ti_le_quy_doi'] ?? 1);
+                if ($tiSoChuyenDoi <= 0) {
+                    $tiSoChuyenDoi = 1;
+                }
+
+                // Tính số lượng đơn vị (số lượng tồn kho theo đơn vị cơ bản)
+                $soLuongDonVi = $soLuong * $tiSoChuyenDoi;
+
+                // Lấy ghi chú
+                $ghiChu = $row['ghi_chu'] ?? '';
+
+                // Tạo sản phẩm
+                $sanPham = SanPham::create([
+                    'ten_san_pham' => trim($tenSanPham),
+                    'dv_nhap_hang' => $dvNhapHangId,
+                    'don_vi_co_ban' => $donViCoBanId,
+                    'gia_nhap' => $giaNhap,
+                    'gia_ban' => $giaBan,
+                    'gia_ban_le' => $giaBanLe,
+                    'so_luong' => $soLuong,
+                    'ti_so_chuyen_doi' => $tiSoChuyenDoi,
+                    'so_luong_don_vi' => $soLuongDonVi,
+                    'ghi_chu' => trim($ghiChu),
+                ]);
+
+                // ========================================
+                // TẠO CÁC ĐƠN VỊ BÁN TRONG san_pham_don_vi
+                // ========================================
+
+                // 1. Đơn vị cơ bản (đơn vị nhỏ nhất, ti_le_quy_doi = 1)
+                if ($donViCoBanId) {
+                    SanPhamDonVi::create([
+                        'san_pham_id' => $sanPham->id,
+                        'don_vi_ban_id' => $donViCoBanId,
+                        'ti_le_quy_doi' => 1,
+                        'gia_ban' => $giaBanLe > 0 ? $giaBanLe : $giaBan,
+                    ]);
+                }
+
+                // 2. Đơn vị nhập hàng (đơn vị lớn - nếu khác đơn vị cơ bản)
+                if ($dvNhapHangId && $dvNhapHangId != $donViCoBanId) {
+                    SanPhamDonVi::create([
+                        'san_pham_id' => $sanPham->id,
+                        'don_vi_ban_id' => $dvNhapHangId,
+                        'ti_le_quy_doi' => $tiSoChuyenDoi,
+                        'gia_ban' => $giaBan,
+                    ]);
+                }
+
+                // 3. Đơn vị trung gian (lốc - nếu có)
+                $donViTrungText = trim($row['don_vi_trung'] ?? '');
+                $giaBanTrung = $this->cleanMoneyFormat($row['gia_ban_trung'] ?? 0);
+                $tiLeQuyDoiTrung = $this->cleanNumberFormat($row['ti_le_quy_doi_trung'] ?? 0);
+
+                if (!empty($donViTrungText) && $tiLeQuyDoiTrung > 0) {
+                    $donViTrungId = $this->lookupOrCreateDonViBan($donViTrungText);
+                    if ($donViTrungId && $donViTrungId != $donViCoBanId && $donViTrungId != $dvNhapHangId) {
+                        SanPhamDonVi::create([
+                            'san_pham_id' => $sanPham->id,
+                            'don_vi_ban_id' => $donViTrungId,
+                            'ti_le_quy_doi' => $tiLeQuyDoiTrung,
+                            'gia_ban' => $giaBanTrung > 0 ? $giaBanTrung : ($giaBanLe * $tiLeQuyDoiTrung),
+                        ]);
+                    }
+                }
+
+                // 4. Đơn vị phụ 1 (nếu có)
+                $donViPhu1Text = trim($row['don_vi_phu_1'] ?? '');
+                $giaBanPhu1 = $this->cleanMoneyFormat($row['gia_ban_phu_1'] ?? 0);
+                $tiLeQuyDoiPhu1 = $this->cleanNumberFormat($row['ti_le_quy_doi_phu_1'] ?? 0);
+
+                if (!empty($donViPhu1Text) && $tiLeQuyDoiPhu1 > 0 && $giaBanPhu1 > 0) {
+                    $donViPhu1Id = $this->lookupOrCreateDonViBan($donViPhu1Text);
+                    if ($donViPhu1Id) {
+                        SanPhamDonVi::create([
+                            'san_pham_id' => $sanPham->id,
+                            'don_vi_ban_id' => $donViPhu1Id,
+                            'ti_le_quy_doi' => $tiLeQuyDoiPhu1,
+                            'gia_ban' => $giaBanPhu1,
+                        ]);
+                    }
+                }
+
+                // 5. Đơn vị phụ 2 (nếu có)
+                $donViPhu2Text = trim($row['don_vi_phu_2'] ?? '');
+                $giaBanPhu2 = $this->cleanMoneyFormat($row['gia_ban_phu_2'] ?? 0);
+                $tiLeQuyDoiPhu2 = $this->cleanNumberFormat($row['ti_le_quy_doi_phu_2'] ?? 0);
+
+                if (!empty($donViPhu2Text) && $tiLeQuyDoiPhu2 > 0 && $giaBanPhu2 > 0) {
+                    $donViPhu2Id = $this->lookupOrCreateDonViBan($donViPhu2Text);
+                    if ($donViPhu2Id) {
+                        SanPhamDonVi::create([
+                            'san_pham_id' => $sanPham->id,
+                            'don_vi_ban_id' => $donViPhu2Id,
+                            'ti_le_quy_doi' => $tiLeQuyDoiPhu2,
+                            'gia_ban' => $giaBanPhu2,
+                        ]);
+                    }
+                }
+
+                DB::commit();
+                $this->successCount++;
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                $this->errors[] = "Dòng {$rowNumber}: " . $e->getMessage();
+            }
         }
-
-        // Tính số lượng đơn vị (số lượng tồn kho theo đơn vị cơ bản)
-        $soLuongDonVi = $soLuong * $tiSoChuyenDoi;
-
-        // Lấy ghi chú
-        $ghiChu = $row['ghi_chu'] ?? '';
-
-        return new SanPham([
-            'ten_san_pham' => trim($tenSanPham),
-            'dv_nhap_hang' => $dvNhapHang, // ID của đơn vị nhập hàng
-            'don_vi_co_ban' => $donViCoBan, // ID hoặc tên của đơn vị bán cơ bản
-            'gia_nhap' => $giaNhap,
-            'gia_ban' => $giaBan,
-            'gia_ban_le' => $giaBanLe,
-            'so_luong' => $soLuong,
-            'ti_so_chuyen_doi' => $tiSoChuyenDoi,
-            'so_luong_don_vi' => $soLuongDonVi,
-            'ghi_chu' => trim($ghiChu),
-        ]);
     }
 
     /**
-     * Lookup đơn vị bán ID từ tên
-     * Trả về ID nếu tìm thấy, hoặc tên gốc nếu không tìm thấy
+     * Lookup đơn vị bán ID từ tên, tạo mới nếu chưa tồn tại
      */
-    protected function lookupDonViBanId(string $tenDonVi)
+    protected function lookupOrCreateDonViBan(?string $tenDonVi): ?int
     {
         if (empty($tenDonVi)) {
             return null;
@@ -93,20 +198,6 @@ class SanPhamImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
             return $this->donViBanCache->get($key)->id;
         }
 
-        // Nếu không tìm thấy, trả về null
-        // Có thể tạo mới đơn vị nếu cần
-        return $this->createNewDonViBan($tenDonVi);
-    }
-
-    /**
-     * Tạo mới đơn vị bán nếu chưa tồn tại
-     */
-    protected function createNewDonViBan(string $tenDonVi)
-    {
-        if (empty($tenDonVi)) {
-            return null;
-        }
-
         // Tạo mới đơn vị bán
         $donViBan = DonViBan::create([
             'ten_don_vi' => $tenDonVi,
@@ -114,91 +205,15 @@ class SanPhamImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
         ]);
 
         // Cập nhật cache
-        if ($this->donViBanCache !== null) {
-            $this->donViBanCache->put(mb_strtolower($tenDonVi), $donViBan);
-        }
+        $this->donViBanCache->put($key, $donViBan);
 
         return $donViBan->id;
     }
 
     /**
-     * Validation rules
-     */
-    public function rules(): array
-    {
-        return [
-            'ten_san_pham' => 'required|string|max:255',
-            'don_vi_ban' => 'nullable|string|max:50',
-            'don_vi_nhap' => 'nullable|string|max:50',
-            'gia_nhap' => 'nullable',
-            'gia_ban' => 'nullable',
-            'gia_ban_le' => 'nullable',
-            'so_luong' => 'nullable',
-            'ti_so_chuyen_doi' => 'nullable',
-            'ghi_chu' => 'nullable|string',
-        ];
-    }
-
-    /**
-     * Prepare data for validation (xử lý alias headers)
-     */
-    public function prepareForValidation($data, $index)
-    {
-        // Alias cho tên sản phẩm
-        if (!isset($data['ten_san_pham']) && isset($data['hang'])) {
-            $data['ten_san_pham'] = $data['hang'];
-        }
-
-        // Alias cho đơn vị bán
-        if (!isset($data['don_vi_ban']) && isset($data['don_vi_co_ban'])) {
-            $data['don_vi_ban'] = $data['don_vi_co_ban'];
-        }
-
-        // Alias cho đơn vị nhập
-        if (!isset($data['don_vi_nhap'])) {
-            $data['don_vi_nhap'] = $data['don_vi_nhap_hang'] ?? $data['dv_nhap_hang'] ?? null;
-        }
-
-        // Alias cho giá nhập
-        if (!isset($data['gia_nhap']) && isset($data['gia_nhap_vao'])) {
-            $data['gia_nhap'] = $data['gia_nhap_vao'];
-        }
-
-        // Alias cho giá bán
-        if (!isset($data['gia_ban']) && isset($data['gia_ban_ra'])) {
-            $data['gia_ban'] = $data['gia_ban_ra'];
-        }
-
-        // Alias cho số lượng
-        if (!isset($data['so_luong']) && isset($data['so_luong_hang'])) {
-            $data['so_luong'] = $data['so_luong_hang'];
-        }
-
-        // Alias cho tỉ số chuyển đổi
-        if (!isset($data['ti_so_chuyen_doi']) && isset($data['ti_le_quy_doi'])) {
-            $data['ti_so_chuyen_doi'] = $data['ti_le_quy_doi'];
-        }
-
-        return $data;
-    }
-
-    /**
-     * Custom validation messages
-     */
-    public function customValidationMessages()
-    {
-        return [
-            'ten_san_pham.required' => 'Tên sản phẩm không được để trống',
-            'ten_san_pham.max' => 'Tên sản phẩm không được vượt quá 255 ký tự',
-            'don_vi_ban.max' => 'Đơn vị bán không được vượt quá 50 ký tự',
-            'don_vi_nhap.max' => 'Đơn vị nhập không được vượt quá 50 ký tự',
-        ];
-    }
-
-    /**
      * Xử lý format số tiền (loại bỏ dấu phẩy, chữ "d", khoảng trắng)
      */
-    private function cleanMoneyFormat($value)
+    private function cleanMoneyFormat($value): int
     {
         if (empty($value)) {
             return 0;
@@ -217,7 +232,7 @@ class SanPhamImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
     /**
      * Xử lý format số (loại bỏ dấu phẩy)
      */
-    private function cleanNumberFormat($value)
+    private function cleanNumberFormat($value): float
     {
         if (empty($value)) {
             return 0;
@@ -239,5 +254,29 @@ class SanPhamImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
     public function headingRow(): int
     {
         return 1;
+    }
+
+    /**
+     * Lấy danh sách lỗi
+     */
+    public function getErrors(): array
+    {
+        return $this->errors;
+    }
+
+    /**
+     * Lấy số sản phẩm import thành công
+     */
+    public function getSuccessCount(): int
+    {
+        return $this->successCount;
+    }
+
+    /**
+     * Kiểm tra có lỗi không
+     */
+    public function hasErrors(): bool
+    {
+        return !empty($this->errors);
     }
 }
