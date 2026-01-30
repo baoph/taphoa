@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\SanPham;
+use App\Models\DonViBan;
 use App\Models\DonViTinh;
+use App\Models\SanPhamDonVi;
 use Illuminate\Http\Request;
 use App\Imports\SanPhamImport;
-use App\Models\DonViBan;
 use Maatwebsite\Excel\Facades\Excel;
 
 class SanPhamController extends Controller
@@ -70,7 +71,8 @@ class SanPhamController extends Controller
     {
         $request->validate([
             'ten_san_pham' => 'required|string|max:255',
-            'dv_nhap_hang' => 'nullable|numeric|max:50',
+            'dv_nhap_hang' => 'nullable|numeric',
+            'don_vi_co_ban' => 'nullable|numeric',
             'gia_nhap' => 'nullable|numeric|min:0',
             'gia_ban' => 'nullable|numeric|min:0',
             'gia_ban_le' => 'nullable|numeric|min:0',
@@ -80,13 +82,19 @@ class SanPhamController extends Controller
         ]);
 
         $data = $request->all();
-
         // Tính toán số lượng đơn vị tự động
         $soLuong = $request->input('so_luong', 0);
         $tiSoChuyenDoi = $request->input('ti_so_chuyen_doi', 1);
         $data['so_luong_don_vi'] = $soLuong * $tiSoChuyenDoi;
 
-        SanPham::create($data);
+        $sanPham = SanPham::create($data);
+        $sanPhamDonVi = [
+            'san_pham_id' => $sanPham->id,
+            'don_vi_ban_id' => $sanPham->dv_nhap_hang,
+            'ti_le_quy_doi' => $sanPham->ti_so_chuyen_doi,
+            'gia_ban' => $sanPham->gia_ban,
+        ];
+        SanPhamDonVi::create($sanPhamDonVi);
 
         return redirect()->route('san-pham.index')
             ->with('success', 'Thêm sản phẩm thành công!');
@@ -108,7 +116,8 @@ class SanPhamController extends Controller
     {
         $request->validate([
             'ten_san_pham' => 'required|string|max:255',
-            'dv_nhap_hang' => 'nullable|numeric|max:50',
+            'dv_nhap_hang' => 'nullable|numeric',
+            'don_vi_co_ban' => 'nullable|numeric',
             'gia_nhap' => 'nullable|numeric|min:0',
             'gia_ban' => 'nullable|numeric|min:0',
             'gia_ban_le' => 'nullable|numeric|min:0',

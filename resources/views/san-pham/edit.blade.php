@@ -101,7 +101,7 @@
                         </div>
 
                         <div class="col-md-3 mb-3">
-                            <label for="so_luong_don_vi" class="form-label">Số lượng đơn vị</label>
+                            <label for="so_luong_don_vi" class="form-label">Số lượng tồn kho</label>
                             <input type="text" class="form-control" id="so_luong_don_vi"
                                    name="so_luong_don_vi" value="{{ old('so_luong_don_vi', $sanPham->so_luong_don_vi ?? 0) }}" readonly>
                             <small class="text-muted">Tự động tính</small>
