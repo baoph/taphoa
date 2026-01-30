@@ -100,7 +100,7 @@ class DonHangController extends Controller
         $soLuongQuyDoi = $request->so_luong;
         if ($request->don_vi_ban_id && $request->san_pham_id) {
             $sanPhamDonVi = \App\Models\SanPhamDonVi::where('san_pham_id', $request->san_pham_id)
-                ->where('don_vi_ban_id', $request->don_vi_ban_id)
+                ->where('id', $request->don_vi_ban_id)
                 ->first();
 
             if ($sanPhamDonVi) {
